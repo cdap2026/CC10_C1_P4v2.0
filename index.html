@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cuadernillo Oficial de Evaluación | Ciencias de la Creación 10° - Gimnasio Cristiano Faro de Luz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --oxford-blue: #0a2240;
+      --institutional-navy: #14365d;
+      --academic-gold: #9a7418;
+      --paper-bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --ink-primary: #0f172a;
+      --border-formal: #cbd5e1;
+    }
+    * {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .serif-academic {
+      font-family: 'Merriweather', Georgia, Cambria, serif;
+    }
+    .mono-academic {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    textarea, input[type="text"], input[type="password"] {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
+    body {
+      background-color: var(--paper-bg);
+      background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
+      background-size: 24px 24px;
+      color: var(--ink-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .academic-sheet {
+      background: var(--card-bg);
+      border: 1px solid var(--border-formal);
+      box-shadow: 0 4px 18px rgba(10, 34, 64, 0.05), 0 1px 3px rgba(10, 34, 64, 0.08);
+    }
+    .oxford-header {
+      background: linear-gradient(180deg, #0a2240 0%, #102d52 100%);
+      border-bottom: 3px solid #b88b28;
+    }
+    .btn-institutional {
+      background-color: #0a2240;
+      color: #ffffff;
+      border: 1px solid #0a2240;
+      transition: all 0.2s ease;
+    }
+    .btn-institutional:hover:not(:disabled) {
+      background-color: #163a66;
+    }
+    .btn-gold-formal {
+      background-color: #b88b28;
+      color: #ffffff;
+      border: 1px solid #9a7418;
+      transition: all 0.2s ease;
+    }
+    .btn-gold-formal:hover:not(:disabled) {
+      background-color: #9a7418;
+    }
+    .option-row {
+      transition: all 0.18s ease;
+      border: 1.5px solid #cbd5e1;
+      background-color: #ffffff;
+    }
+    .option-row:hover {
+      border-color: #0a2240;
+      background-color: #f8fafc;
+    }
+    .option-row.selected {
+      border: 2px solid #0a2240;
+      background-color: #f0f5fa;
+      box-shadow: inset 4px 0 0 #b88b28;
+    }
+    .option-row.selected .option-letter {
+      background-color: #0a2240;
+      color: #ffffff;
+      border-color: #0a2240;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onpaste="return false;">
+
+  <!-- BARRA SUPERIOR INSTITUCIONAL DE AUDITORÍA -->
+  <header class="sticky top-0 z-40 oxford-header text-white px-4 py-2.5 shadow-md">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 text-xs">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/10 border border-white/20 font-semibold tracking-wide uppercase">
+          <span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
+          Supervisión Activa
+        </span>
+        <span class="hidden md:inline-block text-slate-200 font-medium">
+          Penalización: <strong>-0.50 pts</strong> por salida de pestaña o ruido &gt;60%
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Sonómetro Formal -->
+        <div class="flex items-center gap-2 bg-[#07172b] px-3 py-1 rounded border border-slate-600/80" title="Sonómetro en Vivo (Umbral: 60%)">
+          <span class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold">Ruido:</span>
+          <div class="w-16 sm:w-20 h-2 bg-slate-700 rounded-sm overflow-hidden">
+            <div id="noiseBar" class="h-full bg-emerald-500 transition-all duration-150" style="width: 4%;"></div>
+          </div>
+          <span id="noiseText" class="text-[11px] mono-academic font-bold text-slate-200 w-8 text-right">0%</span>
+        </div>
+
+        <!-- Reloj Oficial -->
+        <div class="bg-[#07172b] border border-amber-500/40 px-2.5 py-1 rounded text-xs mono-academic text-amber-200 flex items-center gap-1.5">
+          <span>HORA:</span>
+          <strong id="liveClockDisplay">--:--:--</strong>
+        </div>
+
+        <!-- Botón de Control Docente -->
+        <button onclick="openTeacherModal()" class="btn-gold-formal font-bold text-xs px-3 py-1.5 rounded shadow-sm flex items-center gap-1.5 uppercase tracking-wider">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          <span class="hidden sm:inline">Control Restricciones /</span> Docente
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="max-w-5xl mx-auto px-3 sm:px-6 py-5">
+
+    <!-- BANNER OFICIAL PERMANENTE -->
+    <div class="academic-sheet rounded-lg overflow-hidden mb-5 bg-white">
+      <div class="bg-[#0a2240] px-4 py-1.5 flex flex-wrap items-center justify-between text-[11px] text-slate-200 border-b border-amber-600/50">
+        <span class="font-semibold tracking-wider uppercase">GIMNASIO CRISTIANO FARO DE LUZ • PRUEBA OFICIAL TIPO SABER</span>
+        <span class="mono-academic text-amber-300">CÓDIGO: F-GA2-004 | VERSIÓN: 2</span>
+      </div>
+      <div class="p-2 sm:p-3 bg-white flex items-center justify-center">
+        <img id="mainBannerImg" src="10°_CIENCIAS DE LA CREACIÓN.png" alt="Banner Institucional Ciencias de la Creación 10°" class="w-full h-auto object-contain max-h-52 mx-auto block rounded" />
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- PANTALLA 1: INICIAL LIMPIA Y SINTETIZADA (SOLO DATOS RELEVANTES)   -->
+    <!-- =================================================================== -->
+    <section id="welcomeScreen" class="academic-sheet rounded-lg overflow-hidden bg-white">
+      <!-- Encabezado Limpio -->
+      <div class="bg-slate-50 border-b border-slate-300 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-[#0a2240] block">
+            EVALUACIÓN POR COMPETENCIAS • GRADO 10°
+          </span>
+          <h1 class="serif-academic text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
+            Ciencias de la Creación
+          </h1>
+          <p class="text-xs text-slate-600 mt-0.5">
+            Docente: <strong class="text-slate-800">Cristian David Ayazo</strong> • Ponderación: <strong>5.00 Puntos</strong> (25 Preguntas)
+          </p>
+        </div>
+        <div id="scheduleStatusText" class="text-xs px-3 py-1.5 rounded bg-white border border-slate-300 text-slate-700 font-semibold self-start sm:self-auto">
+          Verificando horario...
+        </div>
+      </div>
+
+      <div class="p-6 space-y-5">
+        <!-- Tarjeta de Horarios Oficiales de los Dos Bloques -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="p-4 rounded-md border border-slate-300 bg-slate-50/80 flex items-start gap-3">
+            <span class="w-8 h-8 rounded bg-[#0a2240] text-white flex items-center justify-center font-bold text-xs shrink-0 mono-academic">
+              B1
+            </span>
+            <div class="text-xs space-y-1">
+              <strong class="text-slate-900 font-bold block text-sm">Sesión 1: 11:25 AM a 12:15 PM</strong>
+              <p class="text-slate-700"><strong>20 Preguntas Cerradas</strong> (2.5 min c/u = 50 min • 3.70 pts).</p>
+              <p class="text-slate-500 text-[11px]">Al finalizar, el progreso se resguarda automáticamente.</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-md border border-slate-300 bg-slate-50/80 flex items-start gap-3">
+            <span class="w-8 h-8 rounded bg-[#b88b28] text-white flex items-center justify-center font-bold text-xs shrink-0 mono-academic">
+              B2
+            </span>
+            <div class="text-xs space-y-1">
+              <strong class="text-slate-900 font-bold text-sm block">Sesión 2: 1:50 PM a 2:30 PM</strong>
+              <p class="text-slate-700"><strong>5 Preguntas Abiertas</strong> (8.0 min c/u = 40 min • 1.30 pts).</p>
+              <p class="text-slate-500 text-[11px]">Se desbloquea con la contraseña del docente (<code>0323</code>).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Pautas Esenciales -->
+        <div class="bg-amber-50/70 border border-amber-200 rounded-md p-3.5 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2">
+          <span>⏳ <strong>Temporizador obligatorio:</strong> El botón de avanzar se activa al llegar a 00:00 y seleccionar/redactar.</span>
+          <span>✍️ <strong>Abiertas:</strong> Mínimo 4 renglones coherentes (28+ palabras).</span>
+          <span>🔇 <strong>Supervisión:</strong> Evita cambiar de pestaña o ruidos superiores al 60%.</span>
+        </div>
+
+        <!-- Tarjeta Prominente de Reanudación de Sesión Guardada -->
+        <div id="savedProgressAlert" class="hidden p-4 rounded-md bg-emerald-50 border-2 border-emerald-600 text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-1.5 font-bold text-emerald-900 text-sm">
+              <svg class="w-5 h-5 text-emerald-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>¡Sesión activa encontrada para este estudiante!</span>
+            </div>
+            <span id="savedProgressDetails" class="text-xs text-emerald-800 block mt-0.5">
+              Respuestas guardadas de la sesión anterior. Puede reanudar el examen exactamente donde quedó.
+            </span>
+          </div>
+          <button onclick="resumeSavedExam()" class="px-5 py-2.5 rounded bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs uppercase tracking-wider transition shrink-0 shadow">
+            Reanudar Prueba Ahora →
+          </button>
+        </div>
+
+        <!-- Registro de Estudiante e Inicio -->
+        <div class="bg-slate-100 border border-slate-300 rounded-md p-4 space-y-3">
+          <label for="studentNameInput" class="block text-xs font-bold uppercase tracking-wider text-[#0a2240]">
+            Nombres y Apellidos Completos del Estudiante:
+          </label>
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <input
+              id="studentNameInput"
+              type="text"
+              placeholder="Ej. Juan Carlos Morales Pérez"
+              autocomplete="off"
+              class="flex-1 bg-white border border-slate-400 focus:border-[#0a2240] rounded px-4 py-2.5 text-slate-900 font-semibold text-sm outline-none"
+              oninput="validateStudentName()"
+            />
+            <button
+              id="startExamBtn"
+              onclick="tryStartExam(false)"
+              disabled
+              class="px-6 py-2.5 rounded font-bold text-xs uppercase tracking-wider transition-all opacity-50 cursor-not-allowed btn-institutional shrink-0"
+            >
+              Iniciar Examen
+            </button>
+          </div>
+          <p id="nameValidationMsg" class="text-[11px] text-slate-500">
+            Escribe tu primer nombre y primer apellido para habilitar el botón de inicio.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PANTALLA 2: CUADERNILLO DE EVALUACIÓN                              -->
+    <!-- =================================================================== -->
+    <section id="examScreen" class="hidden space-y-4">
+
+      <!-- Cabecera de Estado -->
+      <div class="academic-sheet rounded-lg p-3.5 bg-white">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="currentBlockPill" class="px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-[#0a2240] text-white">
+                BLOQUE 1 • CERRADAS (11:25 AM - 12:15 PM)
+              </span>
+              <span id="questionCounterText" class="text-xs font-bold text-slate-600 mono-academic">
+                PREGUNTA 01 DE 25
+              </span>
+            </div>
+            <h2 id="studentHeaderName" class="text-sm font-bold text-slate-900 mt-0.5">
+              Estudiante: --
+            </h2>
+          </div>
+
+          <div class="flex items-center gap-2.5">
+            <div class="bg-red-50 border border-red-300 px-3 py-1 rounded text-center">
+              <span class="block text-[9px] uppercase tracking-wider text-red-800 font-bold">Deducciones</span>
+              <span id="penaltyCounterDisplay" class="text-xs mono-academic font-bold text-red-700">-0.00 pts</span>
+            </div>
+
+            <div class="bg-slate-900 text-white border-2 border-[#b88b28] px-3.5 py-1 rounded text-center min-w-[115px]">
+              <span class="block text-[9px] uppercase tracking-wider text-amber-300 font-bold">Tiempo Pregunta</span>
+              <span id="questionTimerDisplay" class="text-base mono-academic font-bold text-white">02:30</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-2.5 pt-2.5 border-t border-slate-200 flex items-center gap-2">
+          <span class="text-[10px] font-bold uppercase text-slate-500 shrink-0">Progreso:</span>
+          <div class="w-full bg-slate-200 h-1.5 rounded-sm overflow-hidden">
+            <div id="examProgressBar" class="h-full bg-[#0a2240] transition-all duration-300" style="width: 4%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hoja de la Pregunta -->
+      <div class="academic-sheet rounded-lg overflow-hidden bg-white">
+        <!-- Metadatos de la Pregunta -->
+        <div class="bg-slate-100 border-b border-slate-300 px-5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="qTypeBadge" class="px-2 py-0.5 rounded bg-white border border-slate-300 font-bold text-[#0a2240]">
+              Parte I • Cerrada (0.185 pts)
+            </span>
+            <span id="qCompetenceBadge" class="px-2 py-0.5 rounded bg-amber-50 border border-amber-300 font-semibold text-amber-900">
+              Competencia: Explicación de fenómenos
+            </span>
+          </div>
+          <span id="qTopicBadge" class="px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-semibold">
+            Tema: Parques Nacionales Naturales
+          </span>
+        </div>
+
+        <div class="p-5 sm:p-7 space-y-5">
+          <!-- Lámina SVG -->
+          <figure class="border border-slate-300 rounded-md overflow-hidden bg-slate-50">
+            <figcaption class="bg-slate-200/80 border-b border-slate-300 px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
+              <span id="svgFigureCaption">LÁMINA CIENTÍFICA</span>
+              <span class="mono-academic text-[10px] text-slate-500">MATERIAL DE ANÁLISIS</span>
+            </figcaption>
+            <div id="svgContainer" class="w-full p-2 bg-[#0a192f] flex items-center justify-center min-h-[200px]"></div>
+          </figure>
+
+          <!-- Contexto -->
+          <div class="bg-[#fcfaf5] border-l-4 border-[#0a2240] border-t border-r border-b border-slate-200 p-4 rounded-r-md">
+            <div id="questionContextBox" class="serif-academic text-sm text-slate-800 leading-relaxed text-justify space-y-1.5"></div>
+          </div>
+
+          <!-- Enunciado -->
+          <div class="border-l-4 border-[#b88b28] pl-3.5 py-0.5">
+            <div id="questionStemBox" class="text-base font-bold text-slate-900 leading-snug"></div>
+          </div>
+
+          <!-- Opciones Cerradas (1 a 20) -->
+          <div id="closedOptionsContainer" class="space-y-2 pt-1"></div>
+
+          <!-- Área Abierta (21 a 25) -->
+          <div id="openQuestionContainer" class="hidden space-y-2.5 pt-1">
+            <label for="openAnswerTextarea" class="block text-xs font-extrabold uppercase tracking-wider text-[#0a2240]">
+              Redacta tu argumentación científica (Mínimo 4 renglones completos y coherentes — al menos 28 palabras):
+            </label>
+            <textarea
+              id="openAnswerTextarea"
+              rows="5"
+              placeholder="Desarrolla aquí tu explicación científica con vocabulario preciso..."
+              class="serif-academic w-full rounded-md bg-white border-2 border-slate-300 focus:border-[#0a2240] p-3.5 text-sm text-slate-900 leading-relaxed outline-none"
+              oninput="validateOpenAnswerLive()"
+            ></textarea>
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs bg-slate-100 px-3.5 py-2 rounded border border-slate-300">
+              <span id="openLinesCounter" class="mono-academic text-slate-700 font-semibold">
+                Renglones: 0 / 4 | Palabras: 0 / 28
+              </span>
+              <span id="openCoherenceBadge" class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold">
+                Extensión pendiente
+              </span>
+            </div>
+          </div>
+
+          <!-- Pie y Botón de Avance -->
+          <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <p id="lockExplanationText" class="text-xs text-slate-600 font-medium">
+              Espera a que el temporizador llegue a 00:00 y selecciona tu respuesta para avanzar.
+            </p>
+            <button
+              id="nextQuestionBtn"
+              onclick="handleNextQuestion()"
+              disabled
+              class="px-6 py-2.5 rounded font-bold text-xs uppercase tracking-wider transition-all opacity-40 cursor-not-allowed btn-institutional shrink-0"
+            >
+              Guardar y Continuar →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PANTALLA 3: ACTA OFICIAL DE RESULTADOS Y PDF                        -->
+    <!-- =================================================================== -->
+    <section id="resultsScreen" class="hidden academic-sheet rounded-lg overflow-hidden bg-white">
+      <div class="bg-[#0a2240] text-white px-6 py-4 border-b-4 border-[#b88b28] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-amber-300 block">
+            EVALUACIÓN FINALIZADA • GIMNASIO CRISTIANO FARO DE LUZ
+          </span>
+          <h2 class="serif-academic text-xl sm:text-2xl font-bold mt-0.5">
+            Acta Oficial de Resultados: Ciencias de la Creación 10°
+          </h2>
+          <p id="resultStudentSubtitle" class="text-xs text-slate-200 mt-0.5"></p>
+        </div>
+        <button onclick="generateDetailedPDF()" class="btn-gold-formal font-bold text-xs px-4 py-2.5 rounded shadow uppercase tracking-wider flex items-center gap-2 shrink-0">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Descargar Reporte PDF
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="bg-slate-50 border-2 border-[#0a2240] rounded-md p-3.5 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-600 block">Nota Definitiva</span>
+            <span id="finalGradeValue" class="text-3xl mono-academic font-extrabold text-[#0a2240] my-1 block">0.00</span>
+            <span id="finalPerformanceLabel" class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-slate-200 text-slate-800 inline-block">--</span>
+          </div>
+
+          <div class="bg-white border border-slate-300 rounded-md p-3.5 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-600 block">Bloque 1: Cerradas</span>
+            <span id="closedSummaryValue" class="text-2xl mono-academic font-bold text-slate-900 my-1 block">0 / 20</span>
+            <span id="closedPointsText" class="text-xs text-slate-500">0.00 / 3.70 pts</span>
+          </div>
+
+          <div class="bg-white border border-slate-300 rounded-md p-3.5 text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-600 block">Bloque 2: Abiertas</span>
+            <span id="openSummaryValue" class="text-2xl mono-academic font-bold text-slate-900 my-1 block">0 / 5</span>
+            <span id="openPointsText" class="text-xs text-slate-500">0.00 / 1.30 pts</span>
+          </div>
+
+          <div class="bg-red-50/60 border border-red-300 rounded-md p-3.5 text-center">
+            <span class="text-[10px] uppercase font-bold text-red-800 block">Penalizaciones</span>
+            <span id="penaltySummaryValue" class="text-2xl mono-academic font-bold text-red-700 my-1 block">-0.00 pts</span>
+            <span id="penaltyCountText" class="text-xs text-red-700">0 registradas</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-center bg-slate-50 border border-slate-300 rounded-md p-4">
+          <div class="flex flex-col items-center justify-center bg-white p-3 rounded border border-slate-300 mx-auto">
+            <canvas id="qrCanvas" width="160" height="160"></canvas>
+            <span class="text-[9px] mono-academic font-bold text-slate-700 mt-1 uppercase">Código QR Oficial</span>
+          </div>
+          <div class="md:col-span-2 space-y-2">
+            <h3 class="serif-academic text-base font-bold text-[#0a2240]">
+              Auditoría Digital de la Evaluación
+            </h3>
+            <p class="text-xs text-slate-700 leading-relaxed text-justify">
+              El reporte PDF adjunta el banner institucional, los tiempos de inicio y entrega de ambos bloques, el código QR de auditoría criptográfica, las penalizaciones aplicadas y el texto completo redactado en las 5 preguntas abiertas.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-2.5">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-[#0a2240] border-b border-slate-300 pb-1.5">
+            Revisión Ítem por Ítem (25 Preguntas)
+          </h3>
+          <div id="detailedReviewList" class="space-y-2.5 max-h-[460px] overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- MODAL DE SUSPENSIÓN Y REANUDACIÓN ENTRE SESIONES (CLAVE 0323)        -->
+  <!-- =================================================================== -->
+  <div id="interBlockLockModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="academic-sheet max-w-lg w-full rounded-lg overflow-hidden bg-white border-2 border-[#0a2240] shadow-2xl">
+      <div class="bg-[#0a2240] text-white px-5 py-3.5 border-b-2 border-[#b88b28]">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-300 block">
+          CONTROL DE SESIÓN • INTERBLOQUE
+        </span>
+        <h3 class="serif-academic text-base sm:text-lg font-bold mt-0.5">
+          Primer Bloque Resguardado con Éxito
+        </h3>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-4">
+        <p id="interBlockMessage" class="text-xs sm:text-sm text-slate-700 leading-relaxed text-justify">
+          Has completado el <strong>Primer Bloque (11:25 AM – 12:15 PM)</strong>. Todas tus respuestas han quedado guardadas de forma segura. A la <strong>1:50 PM</strong> podrás iniciar el <strong>Segundo Bloque (5 Preguntas Abiertas)</strong> ingresando la contraseña habilitada por el docente (<code>0323</code>).
+        </p>
+
+        <div class="bg-slate-50 border border-slate-300 rounded-md p-4 space-y-2.5">
+          <label for="unlockBlock2Password" class="block text-xs font-bold uppercase tracking-wider text-[#0a2240]">
+            Contraseña de Desbloqueo del Docente (Sesión 2):
+          </label>
+          <input
+            id="unlockBlock2Password"
+            type="password"
+            placeholder="Clave docente (0323)..."
+            class="w-full bg-white border border-slate-400 focus:border-[#0a2240] rounded px-4 py-2 text-slate-900 mono-academic font-bold text-center tracking-widest outline-none"
+          />
+          <p id="unlockBlock2Error" class="hidden text-xs text-red-700 font-bold text-center">
+            Contraseña incorrecta. Solicita la clave (0323) al profesor Cristian David Ayazo.
+          </p>
+          <button
+            onclick="unlockSecondBlockWithPassword()"
+            class="w-full py-2.5 rounded btn-institutional font-bold text-xs uppercase tracking-wider"
+          >
+            Desbloquear e Iniciar Sesión 2 (1:50 PM - 2:30 PM)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE PANTALLA COMPLETA -->
+  <div id="fullscreenModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="academic-sheet max-w-md w-full rounded-lg overflow-hidden bg-white border-2 border-red-700">
+      <div class="bg-red-800 text-white px-5 py-2.5">
+        <h3 class="text-xs font-bold uppercase tracking-wider">Protocolo Académico</h3>
+      </div>
+      <div class="p-5 text-center space-y-3.5">
+        <p class="text-xs text-slate-700 leading-relaxed">
+          Debes permanecer en modo de <strong>Pantalla Completa</strong> durante la evaluación.
+        </p>
+        <button onclick="returnToFullscreen()" class="w-full py-2.5 rounded btn-institutional font-bold text-xs uppercase tracking-wider">
+          Regresar a Pantalla Completa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONTROL DOCENTE Y RESTRICCIONES -->
+  <div id="teacherModal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="academic-sheet max-w-xl w-full rounded-lg overflow-hidden bg-white border-2 border-[#0a2240] max-h-[92vh] flex flex-col">
+      <div class="bg-[#0a2240] text-white px-5 py-3 border-b-2 border-[#b88b28] flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-amber-300 block">CONSOLA ADMINISTRATIVA</span>
+          <h3 class="serif-academic text-sm font-bold">Control de Restricciones del Docente</h3>
+        </div>
+        <button onclick="closeTeacherModal()" class="text-slate-300 hover:text-white text-xs font-bold uppercase px-2 py-1 border border-slate-500 rounded">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <div id="teacherAuthBox" class="space-y-2.5">
+          <label for="teacherPasswordInput" class="block text-xs font-bold uppercase text-slate-700">
+            Ingresa la clave docente (0323 / dmar2026):
+          </label>
+          <div class="flex gap-2">
+            <input
+              id="teacherPasswordInput"
+              type="password"
+              placeholder="Contraseña..."
+              class="flex-1 bg-slate-50 border border-slate-400 focus:border-[#0a2240] rounded px-3 py-1.5 text-slate-900 font-bold outline-none text-sm"
+            />
+            <button onclick="verifyTeacherPassword()" class="btn-institutional font-bold text-xs uppercase px-4 py-1.5 rounded">
+              Ingresar
+            </button>
+          </div>
+          <p id="teacherAuthError" class="hidden text-xs text-red-700 font-bold">Clave incorrecta.</p>
+        </div>
+
+        <div id="teacherControlsPanel" class="hidden space-y-4">
+          <div class="bg-slate-50 border border-slate-300 rounded-md p-3.5 space-y-2.5">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0a2240] border-b border-slate-200 pb-1">
+              Interruptores de Restricciones
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-800">
+              <label class="flex items-center justify-between bg-white p-2 rounded border border-slate-300 cursor-pointer font-medium">
+                <span>Horarios de Bloques</span>
+                <input type="checkbox" id="toggleScheduleCheck" onchange="updateTeacherRestrictions()" class="accent-[#0a2240] w-4 h-4" checked />
+              </label>
+              <label class="flex items-center justify-between bg-white p-2 rounded border border-slate-300 cursor-pointer font-medium">
+                <span>Temporizador por Pregunta</span>
+                <input type="checkbox" id="toggleTimerCheck" onchange="updateTeacherRestrictions()" class="accent-[#0a2240] w-4 h-4" checked />
+              </label>
+              <label class="flex items-center justify-between bg-white p-2 rounded border border-slate-300 cursor-pointer font-medium">
+                <span>Control de Pestañas</span>
+                <input type="checkbox" id="toggleTabCheck" onchange="updateTeacherRestrictions()" class="accent-[#0a2240] w-4 h-4" checked />
+              </label>
+              <label class="flex items-center justify-between bg-white p-2 rounded border border-slate-300 cursor-pointer font-medium">
+                <span>Sonómetro (60%)</span>
+                <input type="checkbox" id="toggleNoiseCheck" onchange="updateTeacherRestrictions()" class="accent-[#0a2240] w-4 h-4" checked />
+              </label>
+              <label class="flex items-center justify-between bg-white p-2 rounded border border-slate-300 cursor-pointer font-medium">
+                <span>Pantalla Completa</span>
+                <input type="checkbox" id="toggleFullscreenCheck" onchange="updateTeacherRestrictions()" class="accent-[#0a2240] w-4 h-4" checked />
+              </label>
+              <label class="flex items-center justify-between bg-white p-2 rounded border border-slate-300 cursor-pointer font-medium">
+                <span>Mínimo 4 Renglones</span>
+                <input type="checkbox" id="toggleLinesCheck" onchange="updateTeacherRestrictions()" class="accent-[#0a2240] w-4 h-4" checked />
+              </label>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#0a2240] border-b border-slate-200 pb-1">
+              Acciones Inmediatas
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button onclick="teacherUnlockOrStartNow()" class="p-2.5 rounded bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs text-left">
+                1. Liberar Reloj a 00:00 Ahora
+              </button>
+              <button onclick="teacherForceNextQuestion()" class="p-2.5 rounded bg-[#0a2240] hover:bg-[#14365d] text-white font-bold text-xs text-left">
+                2. Avanzar a Siguiente Pregunta
+              </button>
+              <button onclick="teacherJumpToOpenBlock()" class="p-2.5 rounded bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs text-left">
+                3. Desbloquear e Ir a Sesión 2 (#21)
+              </button>
+              <button onclick="teacherFinishExamNow()" class="p-2.5 rounded bg-red-800 hover:bg-red-900 text-white font-bold text-xs text-left">
+                4. Finalizar Examen y Ver Reporte
+              </button>
+            </div>
+            <div class="pt-2 flex justify-between gap-2">
+              <button onclick="teacherResetPenalties()" class="px-2.5 py-1.5 rounded bg-slate-200 text-slate-800 text-xs font-bold">
+                Restablecer Penalizaciones
+              </button>
+              <button onclick="teacherClearSavedStorage()" class="px-2.5 py-1.5 rounded bg-red-100 text-red-900 text-xs font-bold">
+                Borrar Datos Guardados
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full pointer-events-none"></div>
+
+  <script>
+    /***********************************************************************
+     * 1. CONFIGURACIÓN GENERAL Y BLOQUES HORARIOS
+     ***********************************************************************/
+    const STORAGE_KEY = 'faroLuz_G10_CienciasCreacion_Exam_v2';
+
+    const CONFIG = {
+      institution: 'GIMNASIO CRISTIANO FARO DE LUZ',
+      teacher: 'Cristian David Ayazo',
+      subject: 'CIENCIAS DE LA CREACIÓN',
+      grade: '10°',
+      bannerFile: '10°_CIENCIAS DE LA CREACIÓN.png',
+      totalClosed: 20,
+      totalOpen: 5,
+      closedBlockPoints: 3.70, // 0.185 c/u
+      openBlockPoints: 1.30,   // 0.260 c/u
+      // Sesión 1: 11:25 AM a 12:15 PM (50 min = 3000 s / 20 = 150 s por pregunta)
+      // Sesión 2: 1:50 PM a 2:30 PM (40 min = 2400 s / 5 = 480 s por pregunta)
+      closedQuestionSeconds: 150,
+      openQuestionSeconds: 480,
+      block1StartMin: 11 * 60 + 25, // 11:25 AM (685)
+      block1EndMin:   12 * 60 + 15, // 12:15 PM (735)
+      block2StartMin: 13 * 60 + 50, // 1:50 PM  (830)
+      block2EndMin:   14 * 60 + 30, // 2:30 PM  (870)
+      restrictions: {
+        scheduleEnabled: true,
+        timerEnabled: true,
+        tabControlEnabled: true,
+        noiseControlEnabled: true,
+        fullscreenEnabled: true,
+        minLinesEnabled: true
+      }
+    };
+
+    /***********************************************************************
+     * 2. LÁMINAS CIENTÍFICAS SVG (25 FIGURAS VECTORIALES)
+     ***********************************************************************/
+    const SVG_ILLUSTRATIONS = [
+      // 1 a 20 (Cerradas)
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#072138"/><stop offset="100%" stop-color="#063429"/></linearGradient></defs><rect width="680" height="220" rx="6" fill="url(#bg1)"/><path d="M30 185 L110 75 L190 185 Z" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/><path d="M85 110 L110 75 L135 110 Z" fill="#e2e8f0"/><text x="110" y="205" fill="#93c5fd" font-size="11" font-weight="bold" text-anchor="middle">CORDILLERA ANDINA</text><rect x="275" y="85" width="130" height="100" rx="6" fill="#854d0e" stroke="#facc15" stroke-width="2"/><text x="340" y="75" fill="#fde047" font-size="12" font-weight="bold" text-anchor="middle">TEPUI GUAYANÉS</text><text x="340" y="205" fill="#fde047" font-size="11" font-weight="bold" text-anchor="middle">PNN SERRANÍA DE CHIRIBIQUETE</text><circle cx="545" cy="125" r="45" fill="#065f46" stroke="#34d399" stroke-width="2"/><text x="545" y="205" fill="#6ee7b7" font-size="11" font-weight="bold" text-anchor="middle">BIOMA AMAZÓNICO</text><path d="M180 130 C215 100, 240 100, 270 130" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="5,4"/><path d="M410 130 C445 100, 470 100, 500 130" fill="none" stroke="#34d399" stroke-width="3" stroke-dasharray="5,4"/><text x="340" y="30" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">CORREDOR ANDES - GUAYANÉS - AMAZONÍA</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#081c33"/><polygon points="120,195 340,25 560,195" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/><polygon points="275,75 340,25 405,75" fill="#f8fafc"/><polygon points="223,115 275,75 405,75 457,115" fill="#ca8a04" fill-opacity="0.55"/><polygon points="172,155 223,115 457,115 508,155" fill="#16a34a" fill-opacity="0.55"/><text x="595" y="65" fill="#f8fafc" font-size="11" font-weight="bold">&gt;4.700 m (Nival)</text><text x="595" y="100" fill="#fde047" font-size="11" font-weight="bold">3.200-4.500 m (Páramo)</text><text x="595" y="140" fill="#4ade80" font-size="11" font-weight="bold">2.400-3.200 m (Altoandino)</text><text x="340" y="212" fill="#facc15" font-size="12" font-weight="bold" text-anchor="middle">GRADIENTE TÉRMICO VERTICAL PNN LOS NEVADOS (-0.6 °C / 100 m)</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#061a2e"/><path d="M0 140 Q140 145 260 155 L260 210 L0 210 Z" fill="#0284c7" fill-opacity="0.6"/><path d="M250 155 L410 105 L580 35 L680 35 L680 210 L250 210 Z" fill="#14532d"/><circle cx="110" cy="175" r="18" fill="#fb7185" fill-opacity="0.8"/><text x="110" y="180" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">CORAL</text><text x="135" y="105" fill="#7dd3fc" font-size="11" font-weight="bold">SURGENCIA COSTERA (Vientos Alisios)</text><text x="355" y="145" fill="#fde047" font-size="11" font-weight="bold">Matorral Xerofítico / Bosque Seco</text><text x="530" y="100" fill="#86efac" font-size="11" font-weight="bold">Bosque Húmedo y Nublado</text><text x="340" y="25" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">CONECTIVIDAD MARINO-TERRESTRE PNN TAYRONA</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#041f36"/><ellipse cx="220" cy="120" rx="85" ry="45" fill="#065f46" stroke="#34d399" stroke-width="2.5"/><text x="220" y="118" fill="#ecfdf5" font-size="12" font-weight="bold" text-anchor="middle">ISLA GORGONA</text><text x="220" y="135" fill="#a7f3d0" font-size="10" text-anchor="middle">Selva Pluvial Insular</text><path d="M420 110 C455 85, 515 85, 555 115 C525 135, 455 135, 420 110 Z" fill="#38bdf8" stroke="#bae6fd" stroke-width="2"/><text x="488" y="116" fill="#082f49" font-size="11" font-weight="bold" text-anchor="middle">Megaptera novaeangliae (Yubarta)</text><text x="340" y="30" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PNN GORGONA: REFUGIO PLEISTOCÉNICO Y PARITORIO DE YUBARTAS</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#0a192f"/><circle cx="170" cy="115" r="55" fill="#1e3a8a" fill-opacity="0.6" stroke="#60a5fa" stroke-width="2"/><circle cx="245" cy="115" r="55" fill="#065f46" fill-opacity="0.6" stroke="#34d399" stroke-width="2"/><circle cx="208" cy="75" r="55" fill="#78350f" fill-opacity="0.6" stroke="#facc15" stroke-width="2"/><text x="208" y="108" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">MACARENA</text><rect x="370" y="55" width="270" height="125" rx="6" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/><path d="M390 140 Q450 110 510 140 T620 135" fill="none" stroke="#f43f5e" stroke-width="8"/><text x="505" y="85" fill="#fda4af" font-size="12" font-weight="bold" text-anchor="middle">Macarenia clavigera (Caño Cristales)</text><text x="505" y="110" fill="#cbd5e1" font-size="10" text-anchor="middle">Aguas oligotróficas + Hapterios en cuarcita</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#07192e"/><rect x="35" y="55" width="185" height="130" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="2"/><text x="127" y="82" fill="#6ee7b7" font-size="12" font-weight="bold" text-anchor="middle">PRESERVACIÓN ESTRICTA</text><text x="127" y="115" fill="#ecfdf5" font-size="11" text-anchor="middle">PNN / SFF / RNN</text><rect x="247" y="55" width="185" height="130" rx="6" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2"/><text x="340" y="82" fill="#93c5fd" font-size="12" font-weight="bold" text-anchor="middle">USO SOSTENIBLE</text><text x="340" y="115" fill="#eff6ff" font-size="11" text-anchor="middle">DMI / Distritos</text><rect x="460" y="55" width="185" height="130" rx="6" fill="#78350f" stroke="#facc15" stroke-width="2"/><text x="552" y="82" fill="#fde047" font-size="12" font-weight="bold" text-anchor="middle">SOCIEDAD CIVIL</text><text x="552" y="115" fill="#fefce8" font-size="11" text-anchor="middle">RNSC (Privadas)</text><text x="340" y="32" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">SISTEMA NACIONAL DE ÁREAS PROTEGIDAS (SINAP)</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#081b33"/><rect x="45" y="55" width="140" height="120" rx="6" fill="#991b1b" stroke="#f87171" stroke-width="2"/><text x="115" y="118" fill="#ecfdf5" font-size="11" font-weight="bold" text-anchor="middle">PARCHE AISLADO</text><text x="115" y="138" fill="#fca5a5" font-size="10" text-anchor="middle">(Endogamia y Borde)</text><circle cx="400" cy="115" r="50" fill="#065f46" stroke="#34d399" stroke-width="2"/><circle cx="575" cy="115" r="50" fill="#065f46" stroke="#34d399" stroke-width="2"/><rect x="445" y="95" width="85" height="40" fill="#047857" stroke="#34d399" stroke-width="2"/><text x="488" y="85" fill="#fde047" font-size="11" font-weight="bold" text-anchor="middle">CORREDOR BIOLÓGICO</text><text x="488" y="198" fill="#6ee7b7" font-size="11" font-weight="bold" text-anchor="middle">FLUJO GÉNICO Y DISPERSIÓN</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#07192d"/><ellipse cx="340" cy="118" rx="250" ry="80" fill="#422006" fill-opacity="0.5" stroke="#f97316" stroke-width="2" stroke-dasharray="6,4"/><ellipse cx="340" cy="118" rx="180" ry="56" fill="#1e3a8a" fill-opacity="0.65" stroke="#60a5fa" stroke-width="2"/><ellipse cx="340" cy="118" rx="100" ry="32" fill="#065f46" stroke="#34d399" stroke-width="2"/><text x="340" y="122" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">ZONA NÚCLEO (PNN)</text><text x="340" y="75" fill="#93c5fd" font-size="11" font-weight="bold" text-anchor="middle">ZONA AMORTIGUADORA (Mitigación agroecológica)</text><text x="340" y="48" fill="#fdba74" font-size="11" font-weight="bold" text-anchor="middle">MATRIZ EXTERNA ANTRÓPICA</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#071c30"/><path d="M40 135 Q180 185 340 140 Q500 185 640 135 L640 195 L40 195 Z" fill="#0284c7" fill-opacity="0.65"/><rect x="65" y="115" width="120" height="35" rx="6" fill="#15803d"/><text x="125" y="137" fill="#dcfce7" font-size="11" font-weight="bold" text-anchor="middle">Macrófitas / Juncos</text><text x="370" y="55" fill="#fde047" font-size="12" font-weight="bold" text-anchor="middle">Aves Migratorias Boreales</text><text x="340" y="175" fill="#e0f2fe" font-size="12" font-weight="bold" text-anchor="middle">HUMEDAL RAMSAR: Esponja Hídrica y Sumidero de Carbono</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#091e36"/><ellipse cx="385" cy="160" rx="85" ry="22" fill="#0ea5e9" stroke="#7dd3fc" stroke-width="2"/><text x="385" y="164" fill="#082f49" font-size="11" font-weight="bold" text-anchor="middle">LAGUNA IGUAQUE</text><line x1="160" y1="145" x2="160" y2="95" stroke="#a16207" stroke-width="6"/><circle cx="160" cy="90" r="16" fill="#84cc16" stroke="#bef264" stroke-width="2"/><text x="160" y="68" fill="#bef264" font-size="11" font-weight="bold" text-anchor="middle">Espeletia (Necromasa)</text><text x="340" y="30" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">SFF IGUAQUE: PÁRAMO Y ADAPTACIONES AL FRÍO</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#04182e"/><polygon points="220,205 310,45 370,45 450,205" fill="#475569" stroke="#94a3b8" stroke-width="2"/><text x="340" y="65" fill="#fde047" font-size="11" font-weight="bold" text-anchor="middle">MONTE SUBMARINO MALPELO</text><ellipse cx="515" cy="125" rx="65" ry="24" fill="#0284c7" stroke="#7dd3fc" stroke-width="2"/><text x="515" y="129" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Sphyrna lewini (Martillo)</text><text x="340" y="28" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">SFF MALPELO: DORSAL OCEÁNICA Y DEPREDADORES TOPE</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#1e1b2e"/><ellipse cx="340" cy="150" rx="250" ry="45" fill="#0e7490" stroke="#67e8f9" stroke-width="2"/><circle cx="195" cy="150" r="18" fill="#f97316"/><text x="195" y="154" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">Artemia</text><rect x="475" y="105" width="125" height="55" rx="6" fill="#be185d" stroke="#f472b6" stroke-width="2"/><text x="537" y="130" fill="#fce7f3" font-size="11" font-weight="bold" text-anchor="middle">Phoenicopterus ruber</text><text x="537" y="146" fill="#fbcfe8" font-size="10" text-anchor="middle">(Carotenoides dietarios)</text><text x="340" y="34" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">SFF LOS FLAMENCOS (LA GUAJIRA): CADENA TRÓFICA</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#071d2c"/><rect x="35" y="75" width="165" height="95" rx="6" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/><text x="117" y="125" fill="#e0f2fe" font-size="12" font-weight="bold" text-anchor="middle">MAR CARIBE (Salino)</text><rect x="255" y="65" width="170" height="115" rx="6" fill="#065f46" stroke="#34d399" stroke-width="2"/><text x="340" y="125" fill="#ecfdf5" font-size="12" font-weight="bold" text-anchor="middle">BOSQUE DE MANGLAR</text><rect x="480" y="75" width="165" height="95" rx="6" fill="#047857" stroke="#6ee7b7" stroke-width="2"/><text x="562" y="125" fill="#ecfdf5" font-size="12" font-weight="bold" text-anchor="middle">RÍO MAGDALENA (Dulce)</text><text x="340" y="32" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">SFF CIÉNAGA GRANDE: HIDRODINÁMICA ESTUARINA</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#08201d"/><rect x="55" y="65" width="260" height="110" rx="6" fill="#064e3b" stroke="#34d399" stroke-width="2"/><text x="185" y="115" fill="#ecfdf5" font-size="12" font-weight="bold" text-anchor="middle">BOSQUE DE NIEBLA</text><rect x="365" y="65" width="260" height="110" rx="6" fill="#115e59" stroke="#fde047" stroke-width="2"/><text x="495" y="115" fill="#fde047" font-size="12" font-weight="bold" text-anchor="middle">Penelope perspicax (Pava Caucana)</text><text x="495" y="135" fill="#ccfbf1" font-size="10" text-anchor="middle">Dispersión zoócora de semillas grandes</text><text x="340" y="32" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">SFF OTÚN QUIMBAYA: DISPERSIÓN Y DOSEL</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#09192b"/><line x1="90" y1="185" x2="610" y2="185" stroke="#94a3b8" stroke-width="2"/><line x1="90" y1="185" x2="90" y2="35" stroke="#94a3b8" stroke-width="2"/><rect x="115" y="145" width="95" height="32" rx="4" fill="#38bdf8" fill-opacity="0.4" stroke="#38bdf8"/><text x="162" y="165" fill="#e0f2fe" font-size="11" font-weight="bold" text-anchor="middle">TUNDRA</text><rect x="445" y="45" width="145" height="75" rx="4" fill="#059669" fill-opacity="0.6" stroke="#34d399" stroke-width="2"/><text x="517" y="85" fill="#ecfdf5" font-size="11" font-weight="bold" text-anchor="middle">SELVA HÚMEDA TROPICAL</text><rect x="445" y="145" width="145" height="32" rx="4" fill="#d97706" fill-opacity="0.5" stroke="#fbbf24"/><text x="517" y="165" fill="#fef3c7" font-size="11" font-weight="bold" text-anchor="middle">DESIERTO</text><text x="350" y="24" fill="#facc15" font-size="13" font-weight="bold" text-anchor="middle">MODELO CLIMÁTICO DE WHITTAKER</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#081b31"/><rect x="45" y="55" width="265" height="135" rx="6" fill="#0f2942" stroke="#38bdf8" stroke-width="2"/><text x="177" y="105" fill="#7dd3fc" font-size="12" font-weight="bold" text-anchor="middle">TUNDRA POLAR (Latitud)</text><text x="177" y="130" fill="#e2e8f0" font-size="11" text-anchor="middle">Estacionalidad anual extrema</text><rect x="370" y="55" width="265" height="135" rx="6" fill="#06392f" stroke="#34d399" stroke-width="2"/><text x="502" y="105" fill="#6ee7b7" font-size="12" font-weight="bold" text-anchor="middle">PÁRAMO ANDINO (Altitud)</text><text x="502" y="130" fill="#fde047" font-size="11" text-anchor="middle">Termoperiodo diario constante</text><text x="340" y="30" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">LATITUD VS. ALTITUD EN MONTAÑAS TROPICALES</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#071e26"/><rect x="55" y="55" width="245" height="135" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="2"/><text x="177" y="95" fill="#6ee7b7" font-size="12" font-weight="bold" text-anchor="middle">SELVA HÚMEDA TROPICAL</text><text x="177" y="130" fill="#fff" font-size="11" text-anchor="middle">85% Nutrientes en biomasa viva</text><text x="177" y="150" fill="#fde047" font-size="10" text-anchor="middle">Suelo ácido lixiviado (Ciclaje rápido)</text><rect x="380" y="55" width="245" height="135" rx="6" fill="#1e293b" stroke="#60a5fa" stroke-width="2"/><text x="502" y="95" fill="#93c5fd" font-size="12" font-weight="bold" text-anchor="middle">BOSQUE TEMPLADO</text><text x="502" y="130" fill="#fff" font-size="11" text-anchor="middle">Nutrientes en horizonte A (Humus)</text><text x="340" y="30" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PARADOJA DEL CICLO DE NUTRIENTES</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#1f160c"/><rect x="50" y="55" width="265" height="135" rx="6" fill="#451a03" stroke="#f59e0b" stroke-width="2"/><text x="182" y="95" fill="#fcd34d" font-size="12" font-weight="bold" text-anchor="middle">BOSQUE SECO TROPICAL</text><text x="182" y="125" fill="#fef3c7" font-size="11" text-anchor="middle">Caducifolia en época seca</text><rect x="365" y="55" width="265" height="135" rx="6" fill="#3f1d2e" stroke="#f43f5e" stroke-width="2"/><text x="497" y="95" fill="#fda4af" font-size="12" font-weight="bold" text-anchor="middle">ESTADO CRÍTICO EN COLOMBIA</text><text x="497" y="125" fill="#f43f5e" font-size="12" font-weight="bold" text-anchor="middle">&lt; 8% de cobertura original</text><text x="340" y="30" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">ZONOBIOMA ALTERNOHÍGRICO: BOSQUE SECO</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#071d29"/><rect x="40" y="60" width="180" height="125" rx="6" fill="#0f2942" stroke="#38bdf8" stroke-width="2"/><text x="130" y="105" fill="#7dd3fc" font-size="11" font-weight="bold" text-anchor="middle">CAPTACIÓN NIEBLA</text><rect x="250" y="60" width="180" height="125" rx="6" fill="#064e3b" stroke="#34d399" stroke-width="2"/><text x="340" y="105" fill="#6ee7b7" font-size="11" font-weight="bold" text-anchor="middle">SUELO ANDISOL / TURBA</text><rect x="460" y="60" width="180" height="125" rx="6" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2"/><text x="550" y="105" fill="#93c5fd" font-size="11" font-weight="bold" text-anchor="middle">REGULACIÓN HÍDRICA</text><text x="340" y="32" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">OROBIOMA DE PÁRAMO: REGULACIÓN ECOHIDROLÓGICA</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#172012"/><rect x="40" y="105" width="260" height="80" rx="6" fill="#854d0e" stroke="#facc15" stroke-width="2"/><text x="170" y="145" fill="#fef08a" font-size="12" font-weight="bold" text-anchor="middle">SABANA ESTACIONAL (Oxisoles)</text><rect x="380" y="105" width="260" height="80" rx="6" fill="#065f46" stroke="#34d399" stroke-width="2"/><text x="510" y="145" fill="#a7f3d0" font-size="12" font-weight="bold" text-anchor="middle">MORICHAL (Mauritia flexuosa)</text><text x="340" y="35" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PEDOBIOMAS DE LA ORINOQUÍA</text></svg>`,
+
+      // 21 a 25 (Abiertas)
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#0b192c"/><rect x="40" y="55" width="165" height="125" rx="6" fill="#065f46" stroke="#34d399" stroke-width="2"/><text x="122" y="115" fill="#ecfdf5" font-size="12" font-weight="bold" text-anchor="middle">AMAZONÍA (Ríos voladores)</text><rect x="255" y="55" width="170" height="125" rx="6" fill="#7f1d1d" stroke="#f87171" stroke-width="2"/><text x="340" y="115" fill="#fecaca" font-size="12" font-weight="bold" text-anchor="middle">DEFORESTACIÓN (Arco)</text><rect x="475" y="55" width="165" height="125" rx="6" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2"/><text x="557" y="115" fill="#e0f2fe" font-size="12" font-weight="bold" text-anchor="middle">ANDES (Páramos)</text><text x="340" y="30" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PREGUNTA ABIERTA 21: CONECTIVIDAD HIDROLÓGICA Y GENÉTICA</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#091a2e"/><polygon points="340,40 120,185 560,185" fill="#1e293b" stroke="#c89d28" stroke-width="2"/><text x="340" y="95" fill="#fde047" font-size="12" font-weight="bold" text-anchor="middle">SANTUARIO (Preservación estricta)</text><text x="340" y="150" fill="#6ee7b7" font-size="12" font-weight="bold" text-anchor="middle">DMI (Uso sostenible comunitario)</text><text x="340" y="25" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PREGUNTA ABIERTA 22: CATEGORIZACIÓN TÉCNICA DEL SINAP</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#0a192f"/><polygon points="150,190 340,35 530,190" fill="#064e3b" stroke="#34d399" stroke-width="2"/><polygon points="275,88 340,35 405,88" fill="#f59e0b" fill-opacity="0.7"/><text x="340" y="75" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">CONTRACCIÓN ALTITUDINAL</text><text x="340" y="140" fill="#a7f3d0" font-size="11" font-weight="bold" text-anchor="middle">Ascenso de isotermas térmicas</text><text x="340" y="28" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PREGUNTA ABIERTA 23: CALENTAMIENTO Y VULNERABILIDAD DEL PÁRAMO</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#1c1917"/><rect x="45" y="65" width="175" height="115" rx="6" fill="#78350f" stroke="#f59e0b" stroke-width="2"/><text x="132" y="125" fill="#fef3c7" font-size="11" font-weight="bold" text-anchor="middle">1. Suelo compactado</text><rect x="252" y="65" width="175" height="115" rx="6" fill="#365314" stroke="#84cc16" stroke-width="2"/><text x="340" y="125" fill="#ecfccb" font-size="11" font-weight="bold" text-anchor="middle">2. Especies pioneras</text><rect x="460" y="65" width="175" height="115" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="2"/><text x="547" y="125" fill="#d1fae5" font-size="11" font-weight="bold" text-anchor="middle">3. Corredores de fauna</text><text x="340" y="32" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PREGUNTA ABIERTA 24: RESTAURACIÓN EN EL BOSQUE SECO</text></svg>`,
+      `<svg viewBox="0 0 680 220" class="w-full h-auto"><rect width="680" height="220" rx="6" fill="#081b38"/><circle cx="340" cy="118" r="65" fill="#064e3b" stroke="#c89d28" stroke-width="2.5"/><text x="340" y="112" fill="#fde047" font-size="12" font-weight="bold" text-anchor="middle">MAYORDOMÍA INTEGRAL</text><text x="340" y="130" fill="#ecfdf5" font-size="10" text-anchor="middle">Ciencia + Responsabilidad Ética</text><text x="340" y="28" fill="#f8fafc" font-size="13" font-weight="bold" text-anchor="middle">PREGUNTA ABIERTA 25: MAYORDOMÍA DE LA CREACIÓN</text></svg>`
+    ];
+
+    /***********************************************************************
+     * 3. BANCO DE 25 PREGUNTAS
+     ***********************************************************************/
+    const QUESTIONS = [
+      {
+        id: 1, type: 'closed', topic: 'Parques Nacionales Naturales en Colombia', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 1: Tepuyes del Escudo Guayanés y Conectividad en Chiribiquete',
+        context: `El Parque Nacional Natural Serranía de Chiribiquete, con más de 4,2 millones de hectáreas en la Amazonía colombiana, protege formaciones rocosas precámbricas tipo tepui del Escudo Guayanés. Estos tepuyes se elevan sobre la selva húmeda creando "islas continentales" con suelos oligotróficos y alta radiación UV. A escala macroecológica, Chiribiquete articula la Orinoquía, el escudo Guayanés, la Amazonía y los Andes.`,
+        stem: `¿Cuál es el efecto combinado del aislamiento en los tepuyes y la ubicación geográfica de Chiribiquete sobre la biodiversidad regional?`,
+        options: [
+          `A. El aislamiento de las cimas restringe el flujo génico promoviendo especiación alopátrica y endemismos, mientras que la selva basal mantiene el corredor genético e hidrológico entre Andes y Amazonía.`,
+          `B. La homogeneidad de las rocas elimina las barreras selectivas, haciendo que las mismas especies andinas colonicen las cumbres sin sufrir diferenciación genética.`,
+          `C. La altitud de los tepuyes detiene por completo la evapotranspiración amazónica hacia los Andes durante todo el año.`,
+          `D. Los suelos guayaneses generan una hiperfertilidad que transforma los bosques inundables en praderas de gramíneas exóticas.`
+        ], correct: 0
+      },
+      {
+        id: 2, type: 'closed', topic: 'Parques Nacionales Naturales en Colombia', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 2: Gradiente Térmico Vertical en el PNN Los Nevados',
+        context: `En el PNN Los Nevados se registra un descenso térmico medio de 0,6 °C por cada 100 m de elevación. Al ascender de 2.000 a 4.800 m s. n. m., la presión atmosférica disminuye, aumenta la radiación incidente y la vegetación transita sucesivamente de bosque andino a páramo y piso nival.`,
+        stem: `¿Por qué ocurre este reemplazo sucesivo de comunidades biológicas a lo largo del gradiente altitudinal?`,
+        options: [
+          `A. Porque el gradiente térmico modifica las tasas metabólicas y la disponibilidad de agua líquida, seleccionando adaptaciones ecofisiológicas específicas en cada piso bioclimático.`,
+          `B. Porque la radiación solar disminuye a cero con la altura, obligando a las plantas del páramo a realizar quimiosíntesis mineral.`,
+          `C. Porque el porcentaje de oxígeno en la atmósfera desciende al 2% en el páramo, haciendo imposible la respiración celular aerobia.`,
+          `D. Porque el suelo nival alcanza más de 45 °C de temperatura subterránea por vulcanismo constante.`
+        ], correct: 0
+      },
+      {
+        id: 3, type: 'closed', topic: 'Parques Nacionales Naturales en Colombia', competence: 'Indagación',
+        figureTitle: 'FIGURA 3: Surgencia Costera en el PNN Tayrona',
+        context: `Entre diciembre y abril, los vientos Alisios del noreste generan en el PNN Tayrona el fenómeno de surgencia (ascenso de aguas frías de 19–22 °C ricas en nitratos y fosfatos), coexistiendo en tierra matorrales secos y bosques húmedos.`,
+        stem: `¿Qué hipótesis y diseño experimental evalúa adecuadamente el impacto biológico de este pulso de surgencia?`,
+        options: [
+          `A. Medir mensualmente clorofila-a, nitratos y temperatura superficial marina en estaciones fijas, esperando un pico de fitoplancton sincronizado con el descenso térmico.`,
+          `B. Medir únicamente la altura de los cactus terrestres en enero, asumiendo que sus espinas enfrían las corrientes marinas profundas.`,
+          `C. Cultivar corales en agua destilada a 35 °C para demostrar que no requieren nutrientes ni salinidad.`,
+          `D. Medir el viento en los picos nevados porque el mar del Tayrona se alimenta exclusivamente de aguas glaciares subterráneas.`
+        ], correct: 0
+      },
+      {
+        id: 4, type: 'closed', topic: 'Parques Nacionales Naturales en Colombia', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 4: Isla Gorgona y Cría de Yubartas en el Pacífico',
+        context: `El PNN Gorgona protege una isla con especies endémicas aisladas tras el Pleistoceno y una extensa área marina que sirve como zona de parto y crianza para las ballenas jorobadas (Megaptera novaeangliae) migrantes de la Antártida.`,
+        stem: `¿Por qué la protección conjunta de la zona insular y la zona marina es vital para estos procesos?`,
+        options: [
+          `A. Porque la isla resguarda linajes genéticos divergentes y regula sedimentos hacia los corales, mientras la zona marina brinda aguas tranquilas donde los ballenatos desarrollan grasa para migrar.`,
+          `B. Porque las ballenas jorobadas se alimentan de las hojas de los árboles selváticos de la isla para amamantar a sus crías.`,
+          `C. Porque el aislamiento insular suprime la selección natural, manteniendo un genoma idéntico a las poblaciones del Amazonas.`,
+          `D. Porque los arrecifes del Pacífico exigen aguas congeladas a 0 °C para el apareamiento de los cetáceos.`
+        ], correct: 0
+      },
+      {
+        id: 5, type: 'closed', topic: 'Parques Nacionales Naturales en Colombia', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 5: Confluencia Biogeográfica en La Macarena y Caño Cristales',
+        context: `En La Macarena confluyen Andes, Amazonía y Orinoquía. En Caño Cristales habita Macarenia clavigera, planta acuática endémica fijada mediante hapterios sobre rocas cuarcíticas en aguas cristalinas y oxigenadas.`,
+        stem: `Si aumentara la deforestación y la turbidez por sedimentos en la cuenca, ¿qué efecto directo sufriría Macarenia clavigera?`,
+        options: [
+          `A. Los sedimentos en suspensión limitarían la luz fotosintética y el lodo impediría la fijación de sus hapterios, provocando el colapso de su población.`,
+          `B. El exceso de sedimentos estimularía a la planta a transformarse en un árbol de raíces profundas de 20 metros.`,
+          `C. La pérdida de oxígeno aumentaría sus pigmentos rojos sin alterar la fauna reófila del río.`,
+          `D. Los fertilizantes cristalizarían el lecho rocoso deteniendo el flujo del agua durante el invierno.`
+        ], correct: 0
+      },
+      {
+        id: 6, type: 'closed', topic: 'Áreas Protegidas', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 6: Categorías de Manejo en el SINAP',
+        context: `El SINAP (Decreto 2372 de 2010) clasifica áreas públicas de preservación estricta (PNN, SFF), de uso sostenible (DMI) y privadas voluntarias (RNSC).`,
+        stem: `Un predio privado con 60% de bosque nativo y 40% de café bajo sombra sostenible puede integrarse legalmente al SINAP como:`,
+        options: [
+          `A. Una Reserva Natural de la Sociedad Civil (RNSC), zonificando conservación y producción sostenible sin perder titularidad privada.`,
+          `B. Un Santuario de Flora y Fauna privado comercial, figura que expropia el predio y autoriza minería.`,
+          `C. Un Parque Nacional Natural particular, permitiendo talar el bosque para ganadería extensiva.`,
+          `D. Una Vía Parque Industrial con autorización de monocultivo químico intensivo.`
+        ], correct: 0
+      },
+      {
+        id: 7, type: 'closed', topic: 'Áreas Protegidas', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 7: Fragmentación, Efecto de Borde y Corredores',
+        context: `La fragmentación de bosques reduce el hábitat a pequeños parches con mayor viento, radiación y desecación en los bordes, aislando a especies como el jaguar y el oso andino.`,
+        stem: `¿Por qué los corredores biológicos entre áreas protegidas son más efectivos que conservar parches aislados?`,
+        options: [
+          `A. Porque restablecen el flujo génico entre subpoblaciones, reduciendo la endogamia y el riesgo de extinción local.`,
+          `B. Porque multiplican el efecto de borde en el núcleo del bosque para erradicar a los grandes depredadores.`,
+          `C. Porque el aislamiento reproductivo de los fragmentos aumenta la heterocigosidad sin necesidad de migración.`,
+          `D. Porque el jaguar requiere vivir en pastizales sin árboles para disipar calor corporal.`
+        ], correct: 0
+      },
+      {
+        id: 8, type: 'closed', topic: 'Áreas Protegidas', competence: 'Indagación',
+        figureTitle: 'FIGURA 8: Función Ecológica de las Zonas Amortiguadoras',
+        context: `Se compara un sector sin zona amortiguadora (agroquímicos hasta el lindero del parque) con un sector que posee zona amortiguadora de 3 km con silvopastoreo y rondas hídricas.`,
+        stem: `¿Qué hallazgo experimental comprueba la función protectora de la zona amortiguadora?`,
+        options: [
+          `A. Mayor diversidad de anfibios y polinizadores dentro del parque y menor residuo de plaguicidas en quebradas gracias a la atenuación ambiental.`,
+          `B. Duplicación de anfibios en el sector sin amortiguación debido a que los químicos estimulan la respiración cutánea.`,
+          `C. Pérdida idéntica de biodiversidad en ambos sectores porque las barreras vivas concentran la deriva química.`,
+          `D. Desaparición de aves en la zona amortiguadora al chocar contra las cercas vivas.`
+        ], correct: 0
+      },
+      {
+        id: 9, type: 'closed', topic: 'Áreas Protegidas', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 9: Humedales Ramsar y Regulación Hídrica',
+        context: `Colombia cuenta con humedales Ramsar como La Cocha, Inírida y Ciénaga Grande, los cuales actúan como esponjas hidráulicas y refugio de aves migratorias.`,
+        stem: `¿Qué impacto ambiental directo genera la canalización con concreto y relleno de un humedal?`,
+        options: [
+          `A. Aumento del riesgo de inundaciones aguas abajo por pérdida de amortiguación, pérdida de aves y liberación de CO₂ y CH₄.`,
+          `B. Mayor recarga de acuíferos subterráneos debido a que el concreto y escombros poseen alta porosidad.`,
+          `C. Mayor capacidad de autodepuración biológica de nitratos y fosfatos por bacterias acuáticas.`,
+          `D. Disminución de la temperatura urbana al retirar el espejo de agua y la vegetación de ribera.`
+        ], correct: 0
+      },
+      {
+        id: 10, type: 'closed', topic: 'Santuarios de Flora y Fauna', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 10: Adaptaciones de Espeletia en el SFF Iguaque',
+        context: `En el SFF Iguaque (Boyacá), los frailejones (Espeletia) conservan sus hojas secas adheridas al tallo (necromasa) en lugar de desprenderlas.`,
+        stem: `¿Qué ventaja ecofisiológica confiere esta necromasa al frailejón en el páramo?`,
+        options: [
+          `A. Aísla térmicamente el tallo vascular contra heladas nocturnas y ayuda a retener humedad condensada de la niebla.`,
+          `B. Genera combustión espontánea semanal para quemar las turberas del suelo.`,
+          `C. Aumenta la pérdida de agua al mediodía para secar las raíces de la planta.`,
+          `D. Bloquea la luz solar superior para transformar al frailejón en un hongo parásito.`
+        ], correct: 0
+      },
+      {
+        id: 11, type: 'closed', topic: 'Santuarios de Flora y Fauna', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 11: Montes Submarinos y Tiburones en el SFF Malpelo',
+        context: `En el SFF Malpelo confluyen corrientes contra montes submarinos, generando surgencias que congregan cardúmenes de peces y cientos de tiburones martillo (Sphyrna lewini).`,
+        stem: `¿Qué efecto tendría sobre la red trófica marina la sobrepesca de estos tiburones martillo?`,
+        options: [
+          `A. Desencadenaría una cascada trófica al descontrolar las poblaciones de mesodepredadores y alterar el equilibrio de la comunidad pelágica.`,
+          `B. Ninguno, ya que los tiburones martillo son herbívoros que se alimentan de líquenes terrestres de la isla.`,
+          `C. Un incremento inmediato de la diversidad genética de los corales sin modificar la biomasa de peces.`,
+          `D. La extinción total del fitoplancton al cesar la surgencia de nutrientes en los montes submarinos.`
+        ], correct: 0
+      },
+      {
+        id: 12, type: 'closed', topic: 'Santuarios de Flora y Fauna', competence: 'Indagación',
+        figureTitle: 'FIGURA 12: Salinidad y Dieta de Flamencos en el SFF Los Flamencos',
+        context: `En las ciénagas del SFF Los Flamencos (La Guajira), el flamenco (Phoenicopterus ruber) se alimenta filtrando Artemia y microalgas halófilas ricas en carotenoides.`,
+        stem: `Si una obra obstruye el intercambio hídrico y colapsa la Artemia, ¿por qué los flamencos presentan plumaje pálido y menor éxito reproductivo?`,
+        options: [
+          `A. Porque no sintetizan carotenoides de novo; la escasez de presas reduce los pigmentos dietarios necesarios para colorear sus plumas y el cortejo.`,
+          `B. Porque el color rosado proviene de frotarse con la arena del desierto y no de la ingesta de alimento.`,
+          `C. Porque los flamencos realizan fotosíntesis foliar que requiere agua 100% dulce para mantenerse rosados.`,
+          `D. Porque la Artemia sobreviviente crece hasta convertirse en un depredador de flamencos adultos.`
+        ], correct: 0
+      },
+      {
+        id: 13, type: 'closed', topic: 'Santuarios de Flora y Fauna', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 13: Hidrodinámica Estuarina en la Ciénaga Grande',
+        context: `La interrupción de flujos de agua dulce hacia la Ciénaga Grande de Santa Marta disparó la salinidad a más de 80–100 UPS, matando miles de hectáreas de manglar.`,
+        stem: `¿Por qué la reapertura de caños desde el río Magdalena es fundamental para restablecer los manglares?`,
+        options: [
+          `A. Porque el agua dulce reduce la hipersalinidad edáfica a rangos tolerables para la fisiología del mangle y oxigena los sedimentos.`,
+          `B. Porque los mangles son plantas de alta montaña que mueren ante cualquier presencia de sal marina.`,
+          `C. Porque el río Magdalena seca el fango estuarino erradicando los cangrejos del suelo.`,
+          `D. Porque el cierre permanente de los caños es la única vía para oxigenar el agua estancada.`
+        ], correct: 0
+      },
+      {
+        id: 14, type: 'closed', topic: 'Santuarios de Flora y Fauna', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 14: Mutualismo Planta-Frugívoro en el SFF Otún Quimbaya',
+        context: `En el SFF Otún Quimbaya (Risaralda), árboles del bosque de niebla dependen de la pava caucana (Penelope perspicax) y la danta para dispersar semillas grandes.`,
+        stem: `¿Qué consecuencia ecológica ocasionaría la extinción local de estos dispersores frugívoros?`,
+        options: [
+          `A. Menor reclutamiento y regeneración de árboles de semilla grande por acumulación y mortalidad bajo el árbol progenitor (efecto Janzen-Connell).`,
+          `B. Los árboles pasarían a multiplicarse inmediatamente por esporas acuáticas sin verse afectados.`,
+          `C. Mayor flujo génico arbóreo al caer las semillas en el mismo punto de origen.`,
+          `D. El bosque de niebla se transformaría en un arrecife coralino en pocas semanas.`
+        ], correct: 0
+      },
+      {
+        id: 15, type: 'closed', topic: 'Biomas', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 15: Clasificación Bioclimática de Whittaker',
+        context: `El modelo de Whittaker clasifica los biomas según temperatura y precipitación media anual.`,
+        stem: `Un bioma con temperaturas de -5 °C a 2 °C, permafrost que impide árboles, bajas lluvias y vegetación de musgos y líquenes corresponde a:`,
+        options: [
+          `A. Tundra polar y ártica.`,
+          `B. Sabana tropical alternohígrica.`,
+          `C. Bosque mediterráneo esclerófilo.`,
+          `D. Selva pluvial ecuatorial.`
+        ], correct: 0
+      },
+      {
+        id: 16, type: 'closed', topic: 'Biomas', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 16: Tundra Polar vs. Páramo Tropical',
+        context: `Tanto la tundra ártica como el páramo andino poseen bajas temperaturas medias y carecen de árboles altos, pero difieren en su régimen de radiación solar.`,
+        stem: `¿Qué diferencia térmica moldea las adaptaciones de la flora del páramo colombiano frente a la tundra?`,
+        options: [
+          `A. En el páramo la oscilación térmica es diaria ("verano de día, invierno de noche"), exigiendo tolerar heladas nocturnas todo el año sin letargo prolongado.`,
+          `B. En el páramo hay noche polar de seis meses con permafrost idéntico a Siberia.`,
+          `C. En la tundra la radiación es perpendicular y en Colombia existen 4 estaciones astronómicas de nieve.`,
+          `D. La flora del páramo nunca experimenta temperaturas menores a 25 °C.`
+        ], correct: 0
+      },
+      {
+        id: 17, type: 'closed', topic: 'Biomas', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 17: Paradoja del Ciclaje de Nutrientes en la Selva Tropical',
+        context: `Los suelos de la selva húmeda tropical amazónica (oxisoles y ultisoles) son viejos, ácidos y pobres en nutrientes minerales por intensa lixiviación.`,
+        stem: `¿Cómo sostiene este bioma una biomasa y biodiversidad tan exuberante sobre suelos tan pobres?`,
+        options: [
+          `A. Mediante un ciclaje ultrarrápido donde los nutrientes están en la biomasa viva y hongos micorrízicos transfieren la materia orgánica descompuesta a las raíces superficiales.`,
+          `B. Porque los árboles tropicales sintetizan minerales a partir de granito inerte sin requerir fósforo ni nitrógeno.`,
+          `C. Porque el frío amazónico acumula 10 metros de humus negro fértil en el suelo.`,
+          `D. Porque la quema de la selva para ganadería aumenta la fertilidad de forma permanente por siglos.`
+        ], correct: 0
+      },
+      {
+        id: 18, type: 'closed', topic: 'Biomas Colombianos', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 18: Bosque Seco Tropical en Colombia',
+        context: `El Bosque Seco Tropical (Caribe y valles interandinos) sufre sequías de varios meses y conserva menos del 8% de su cobertura original en Colombia.`,
+        stem: `¿Qué adaptación vegetal permite a sus árboles superar el prolongado déficit de agua?`,
+        options: [
+          `A. La caducifolia sincronizada (caída de hojas en sequía) para reducir al mínimo la transpiración y proteger los vasos del xilema.`,
+          `B. Desarrollar hojas siempreverdes gigantes que abren estomas al mediodía para perder agua.`,
+          `C. Desarrollar neumatóforos sumergidos en el mar a 4.000 metros de altitud.`,
+          `D. Suspender la reproducción sexual por carecer de flores y semillas.`
+        ], correct: 0
+      },
+      {
+        id: 19, type: 'closed', topic: 'Biomas Colombianos', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 19: Función Ecohidrológica del Páramo',
+        context: `Los páramos colombianos (Orobiomas andinos) abastecen de agua potable a cerca del 70% del país mediante pajonales, frailejones, musgos Sphagnum y suelos orgánicos.`,
+        stem: `¿Cómo regula el páramo el caudal de los ríos tanto en lluvias como en sequía?`,
+        options: [
+          `A. La vegetación intercepta la niebla horizontal y los suelos orgánicos porosos almacenan el agua liberándola gradualmente hacia las cuencas.`,
+          `B. Los frailejones sintetizan moléculas de agua líquida mediante fusión nuclear en sus hojas.`,
+          `C. El suelo del páramo es roca impermeable que expulsa el 100% del agua en el primer segundo dejándolo seco el resto del año.`,
+          `D. La minería a cielo abierto duplica la capacidad de almacenamiento de agua de las turberas.`
+        ], correct: 0
+      },
+      {
+        id: 20, type: 'closed', topic: 'Biomas Colombianos', competence: 'Indagación',
+        figureTitle: 'FIGURA 20: Sabanas y Morichales en la Orinoquía',
+        context: `En la Orinoquía coexisten sabanas de suelos ácidos con bosques de galería y morichales (Mauritia flexuosa) a lo largo de cursos de agua permanentes.`,
+        stem: `¿Qué impacto genera talar los morichales y drenar caños para monocultivos en la altillanura?`,
+        options: [
+          `A. Destruye los corredores hídricos que brindan agua y frutos a la fauna en la sequía y deseca el nivel freático regional.`,
+          `B. Aumenta de forma natural el caudal de los ríos al eliminar la sombra de las palmas.`,
+          `C. Convierte los suelos ácidos en tierras fértiles alcalinas de forma espontánea.`,
+          `D. Incrementa la población de chigüiros y dantas al retirar los cuerpos de agua.`
+        ], correct: 0
+      },
+
+      // 21 a 25 (Abiertas)
+      {
+        id: 21, type: 'open', topic: 'Parques Nacionales Naturales en Colombia', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 21: Corredor AMEM y Ríos Voladores',
+        context: `El corredor Chiribiquete - Tinigua - Macarena conecta los Andes y la Amazonía. La selva amazónica aporta vapor de agua ("ríos voladores") que los vientos llevan a condensar en los páramos andinos.`,
+        stem: `Explica científicamente cómo la deforestación en este corredor impacta simultáneamente: (1) el flujo génico de fauna entre Amazonía y Andes, y (2) las fuentes hídricas de la Cordillera Oriental. (Mínimo 4 renglones coherentes).`,
+        rubricKeywords: ['conectividad', 'flujo', 'evapotranspiracion', 'paramo', 'corredor', 'agua', 'fragmentacion']
+      },
+      {
+        id: 22, type: 'open', topic: 'Áreas Protegidas y Santuarios de Flora y Fauna', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 22: Santuario vs. Distrito de Manejo Integrado',
+        context: `Se requiere categorizar dos zonas: la Zona A es un bosque de niebla prístino con una rana endémica en peligro crítico; la Zona B es una cuenca con parches de bosque y campesinos con agroforestería sostenible.`,
+        stem: `Argumenta cuál debe ser Santuario de Flora y Fauna (SFF) y cuál Distrito de Manejo Integrado (DMI), detallando sus objetivos de conservación y la participación comunitaria permitida. (Mínimo 4 renglones coherentes).`,
+        rubricKeywords: ['santuario', 'distrito', 'preservacion', 'sostenible', 'endemica', 'comunidades', 'conservacion']
+      },
+      {
+        id: 23, type: 'open', topic: 'Biomas Colombianos (Páramos)', competence: 'Explicación de fenómenos',
+        figureTitle: 'FIGURA 23: Calentamiento Global y Páramos Andinos',
+        context: `El ascenso de la temperatura empuja las especies de montaña hacia la cumbre ("escalera al cielo"), reduciendo el área disponible de páramo y alterando las turberas.`,
+        stem: `Analiza cómo el calentamiento pone en riesgo a los frailejones y cómo la degradación de los suelos orgánicos del páramo afecta la regulación hídrica y las emisiones de carbono. (Mínimo 4 renglones coherentes).`,
+        rubricKeywords: ['altitud', 'temperatura', 'frailejon', 'suelo', 'carbono', 'agua', 'extincion']
+      },
+      {
+        id: 24, type: 'open', topic: 'Biomas Colombianos (Bosque Seco Tropical)', competence: 'Indagación',
+        figureTitle: 'FIGURA 24: Restauración de Bosque Seco en Córdoba',
+        context: `En Córdoba se busca restaurar 200 hectáreas de potreros degradados para conectar parches donde sobrevive el tití cabeciblanco (Saguinus oedipus).`,
+        stem: `Diseña un plan ecológico de restauración: qué harías con el suelo compactado, por qué usarías especies pioneras leguminosas nativas y cómo medirías el éxito del corredor a mediano plazo. (Mínimo 4 renglones coherentes).`,
+        rubricKeywords: ['suelo', 'pioneras', 'nitrogeno', 'conectividad', 'semillas', 'sucesion', 'fauna']
+      },
+      {
+        id: 25, type: 'open', topic: 'Mayordomía de la Creación y Biodiversidad', competence: 'Uso comprensivo del conocimiento científico',
+        figureTitle: 'FIGURA 25: Mayordomía Cristiana de la Biodiversidad',
+        context: `En Ciencias de la Creación entendemos que la megadiversidad colombiana exige una mayordomía sabia, ética y científicamente fundamentada.`,
+        stem: `Argumenta por qué la destrucción de parques y biomas en Colombia representa una crisis ambiental y una falta a la mayordomía de la Creación, proponiendo acciones de conservación desde tu entorno. (Mínimo 4 renglones coherentes).`,
+        rubricKeywords: ['creacion', 'mayordomia', 'conservacion', 'biodiversidad', 'ecosistemas', 'responsabilidad', 'vida']
+      }
+    ];
+
+    /***********************************************************************
+     * 4. ESTADO GLOBAL Y PERSISTENCIA (LOCALSTORAGE)
+     ***********************************************************************/
+    let examState = {
+      studentName: '',
+      started: false,
+      finished: false,
+      currentIndex: 0,
+      block1Completed: false,
+      block2UnlockedByTeacher: false,
+      waitingForBlock2: false,
+      startTimeISO: null,
+      block1EndTimeISO: null,
+      block2StartTimeISO: null,
+      endTimeISO: null,
+      remainingSeconds: CONFIG.closedQuestionSeconds,
+      closedAnswers: {},
+      openAnswers: {},
+      penalties: 0,
+      penaltyLog: []
+    };
+
+    let questionTimerInterval = null;
+    let clockInterval = null;
+    let lastUserActivity = Date.now();
+    let lastNoisePenaltyTime = 0;
+    let audioContext = null;
+    let analyserNode = null;
+    let microphoneStream = null;
+    let officialBannerDataUrlCache = null;
+
+    /***********************************************************************
+     * 5. RESPALDO CANVAS PARA BANNER ANTI-CORS
+     ***********************************************************************/
+    function generateOfficialBannerDataURL() {
+      if (officialBannerDataUrlCache) return officialBannerDataUrlCache;
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 280;
+      const ctx = canvas.getContext('2d');
+
+      const grad = ctx.createLinearGradient(0, 0, 1200, 280);
+      grad.addColorStop(0, '#0a2240');
+      grad.addColorStop(0.55, '#14365d');
+      grad.addColorStop(1, '#0a2240');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1200, 280);
+
+      ctx.fillStyle = '#b88b28';
+      ctx.fillRect(0, 0, 1200, 10);
+      ctx.fillRect(0, 270, 1200, 10);
+
+      ctx.fillStyle = '#f3cd69';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('GIMNASIO CRISTIANO FARO DE LUZ • MANANTIAL DE DIOS', 180, 60);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 38px serif';
+      ctx.fillText('10° • CIENCIAS DE LA CREACIÓN', 180, 115);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.strokeStyle = '#b88b28';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(180, 135, 840, 48, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText('PNN EN COLOMBIA • ÁREAS PROTEGIDAS • SANTUARIOS • BIOMAS', 200, 165);
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText('Docente: Cristian David Ayazo | Bloque 1 (11:25-12:15) • Bloque 2 (1:50-2:30)', 180, 215);
+
+      officialBannerDataUrlCache = canvas.toDataURL('image/jpeg', 0.92);
+      return officialBannerDataUrlCache;
+    }
+
+    function initBannerImage() {
+      const img = document.getElementById('mainBannerImg');
+      img.onerror = function() {
+        img.onerror = null;
+        img.src = generateOfficialBannerDataURL();
+      };
+    }
+
+    async function getBannerForPDF() {
+      const img = document.getElementById('mainBannerImg');
+      try {
+        if (img && img.complete && img.naturalWidth > 0) {
+          const c = document.createElement('canvas');
+          c.width = img.naturalWidth;
+          c.height = img.naturalHeight;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          return c.toDataURL('image/jpeg', 0.92);
+        }
+      } catch (e) {}
+      return generateOfficialBannerDataURL();
+    }
+
+    /***********************************************************************
+     * 6. RELOJ EN VIVO Y HORARIOS DE SESIÓN 1 Y SESIÓN 2
+     ***********************************************************************/
+    function getCurrentMinutesOfDay() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes();
+    }
+
+    function isWithinBlock1Window() {
+      const mins = getCurrentMinutesOfDay();
+      return mins >= CONFIG.block1StartMin && mins < CONFIG.block1EndMin;
+    }
+
+    function isWithinBlock2Window() {
+      const mins = getCurrentMinutesOfDay();
+      return mins >= CONFIG.block2StartMin && mins < CONFIG.block2EndMin;
+    }
+
+    function updateLiveClockAndSchedule() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      document.getElementById('liveClockDisplay').textContent = timeStr;
+
+      const mins = getCurrentMinutesOfDay();
+      const schedEl = document.getElementById('scheduleStatusText');
+
+      if (!CONFIG.restrictions.scheduleEnabled) {
+        schedEl.textContent = '● Horario Liberado por Docente';
+        schedEl.className = 'text-xs px-3 py-1.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold';
+      } else {
+        if (isWithinBlock1Window()) {
+          schedEl.textContent = '● Sesión 1 ACTIVA (11:25 AM - 12:15 PM)';
+          schedEl.className = 'text-xs px-3 py-1.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold';
+        } else if (isWithinBlock2Window()) {
+          schedEl.textContent = '● Sesión 2 ACTIVA (1:50 PM - 2:30 PM)';
+          schedEl.className = 'text-xs px-3 py-1.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold';
+        } else {
+          schedEl.textContent = '⏳ En espera de horario oficial (11:25 o 1:50)';
+          schedEl.className = 'text-xs px-3 py-1.5 rounded bg-slate-100 text-slate-700 border border-slate-300 font-semibold';
+        }
+      }
+
+      // Bloqueo automático al llegar las 12:15 PM si está en el Bloque 1
+      if (examState.started && !examState.finished && CONFIG.restrictions.scheduleEnabled) {
+        if (!examState.block2UnlockedByTeacher && !examState.waitingForBlock2 && mins >= CONFIG.block1EndMin && mins < CONFIG.block2EndMin) {
+          lockExamAtEndOfBlock1('Se cumplió la hora de cierre de la Sesión 1 (12:15 PM). Tu progreso está resguardado. Regresa a la 1:50 PM para iniciar la Sesión 2 con la clave del docente (0323).');
+        }
+        if (examState.block2UnlockedByTeacher && mins >= CONFIG.block2EndMin) {
+          showToast('Hora de cierre de la Sesión 2 (2:30 PM) alcanzada. Generando reporte...', 'warning');
+          finishExam();
+        }
+      }
+    }
+
+    /***********************************************************************
+     * 7. GUARDADO AUTOMÁTICO, REANUDACIÓN Y ARRANQUE
+     ***********************************************************************/
+    function validateStudentName() {
+      const input = document.getElementById('studentNameInput').value.trim();
+      const words = input.split(/\s+/).filter(w => w.length >= 2);
+      const btn = document.getElementById('startExamBtn');
+      const msg = document.getElementById('nameValidationMsg');
+
+      if (words.length >= 2) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        msg.textContent = '✓ Nombre listo para iniciar.';
+        msg.className = 'text-[11px] text-emerald-700 font-bold';
+      } else {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        msg.textContent = 'Escribe tu primer nombre y primer apellido para habilitar el botón de inicio.';
+        msg.className = 'text-[11px] text-slate-500';
+      }
+    }
+
+    function saveExamProgress() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(examState));
+      } catch (e) {}
+    }
+
+    function checkSavedProgressOnLoad() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.studentName && parsed.started && !parsed.finished) {
+          const alertBox = document.getElementById('savedProgressAlert');
+          const details = document.getElementById('savedProgressDetails');
+          alertBox.classList.remove('hidden');
+
+          const answeredClosed = Object.keys(parsed.closedAnswers || {}).length;
+          const statusText = parsed.block1Completed || parsed.waitingForBlock2 || parsed.currentIndex >= CONFIG.totalClosed
+            ? `Estudiante: ${parsed.studentName} • Bloque 1 Finalizado (${answeredClosed}/20 respondidas). Listo para iniciar Bloque 2.`
+            : `Estudiante: ${parsed.studentName} • Sesión en curso en la Pregunta ${parsed.currentIndex + 1} de 25.`;
+
+          details.textContent = statusText;
+          document.getElementById('studentNameInput').value = parsed.studentName;
+          validateStudentName();
+        }
+      } catch (e) {}
+    }
+
+    function resumeSavedExam() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        examState = JSON.parse(raw);
+        document.getElementById('welcomeScreen').classList.add('hidden');
+        document.getElementById('examScreen').classList.remove('hidden');
+        document.getElementById('studentHeaderName').textContent = `Estudiante: ${examState.studentName}`;
+
+        requestExamFullscreen();
+        initNoiseMonitor();
+
+        // Si estaba esperando la Sesión 2 y aún no se ha desbloqueado con la clave 0323
+        if ((examState.waitingForBlock2 || examState.block1Completed || examState.currentIndex >= CONFIG.totalClosed) && !examState.block2UnlockedByTeacher) {
+          showInterBlockLockModal();
+        } else {
+          renderCurrentQuestion(true);
+        }
+      } catch (e) {}
+    }
+
+    function tryStartExam(forcedByTeacher) {
+      const nameInput = document.getElementById('studentNameInput').value.trim();
+      const words = nameInput.split(/\s+/).filter(w => w.length >= 2);
+      if (words.length < 2 && !forcedByTeacher) {
+        showToast('Escribe tus nombres y apellidos completos.', 'error');
+        return;
+      }
+
+      // Si hay progreso guardado de ese mismo estudiante, reanudar en lugar de sobrescribir
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.studentName.toLowerCase() === nameInput.toLowerCase() && !parsed.finished) {
+            resumeSavedExam();
+            return;
+          }
+        }
+      } catch (e) {}
+
+      if (CONFIG.restrictions.scheduleEnabled && !forcedByTeacher) {
+        if (!isWithinBlock1Window() && !isWithinBlock2Window()) {
+          showToast('Horario: Bloque 1 (11:25-12:15) y Bloque 2 (1:50-2:30). El docente puede habilitar el ingreso en el panel superior.', 'warning');
+          openTeacherModal();
+          return;
+        }
+      }
+
+      examState.studentName = nameInput || 'Estudiante Autorizado';
+      examState.started = true;
+      examState.finished = false;
+      examState.currentIndex = 0;
+      examState.startTimeISO = new Date().toISOString();
+      saveExamProgress();
+
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('examScreen').classList.remove('hidden');
+      document.getElementById('studentHeaderName').textContent = `Estudiante: ${examState.studentName}`;
+
+      requestExamFullscreen();
+      initNoiseMonitor();
+      renderCurrentQuestion(false);
+    }
+
+    /***********************************************************************
+     * 8. RENDERIZADO DE PREGUNTAS Y CONTROLES DE AVANCE
+     ***********************************************************************/
+    function renderCurrentQuestion(keepRemainingSeconds) {
+      const idx = examState.currentIndex;
+      if (idx >= QUESTIONS.length) {
+        finishExam();
+        return;
+      }
+
+      const q = QUESTIONS[idx];
+      const isClosed = q.type === 'closed';
+
+      const blockPill = document.getElementById('currentBlockPill');
+      if (isClosed) {
+        blockPill.textContent = 'BLOQUE 1 • CERRADAS (11:25 AM - 12:15 PM)';
+        blockPill.className = 'px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-[#0a2240] text-white';
+      } else {
+        blockPill.textContent = 'BLOQUE 2 • ABIERTAS (1:50 PM - 2:30 PM)';
+        blockPill.className = 'px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-[#b88b28] text-white';
+      }
+
+      document.getElementById('questionCounterText').textContent =
+        `PREGUNTA ${String(idx + 1).padStart(2, '0')} DE ${QUESTIONS.length}`;
+      const pct = Math.round(((idx + 1) / QUESTIONS.length) * 100);
+      document.getElementById('examProgressBar').style.width = `${pct}%`;
+
+      document.getElementById('qTypeBadge').textContent = isClosed
+        ? `Parte I • Cerrada #${idx + 1} de 20 (0.185 pts)`
+        : `Parte II • Abierta #${idx - CONFIG.totalClosed + 1} de 5 (0.260 pts)`;
+      document.getElementById('qCompetenceBadge').textContent = `Competencia: ${q.competence}`;
+      document.getElementById('qTopicBadge').textContent = `Tema: ${q.topic}`;
+
+      document.getElementById('svgFigureCaption').textContent = q.figureTitle;
+      document.getElementById('svgContainer').innerHTML = SVG_ILLUSTRATIONS[idx] || '';
+
+      document.getElementById('questionContextBox').innerHTML = `<p>${q.context}</p>`;
+      document.getElementById('questionStemBox').textContent = `${idx + 1}. ${q.stem}`;
+
+      const closedBox = document.getElementById('closedOptionsContainer');
+      const openBox = document.getElementById('openQuestionContainer');
+
+      if (isClosed) {
+        closedBox.classList.remove('hidden');
+        openBox.classList.add('hidden');
+        closedBox.innerHTML = '';
+
+        q.options.forEach((optText, optIdx) => {
+          const isSelected = examState.closedAnswers[idx] === optIdx;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `option-row w-full text-left p-3.5 rounded-md flex items-start gap-3 ${isSelected ? 'selected' : ''}`;
+          btn.onclick = () => selectClosedOption(optIdx);
+          btn.innerHTML = `
+            <span class="option-letter w-6 h-6 rounded bg-slate-100 border border-slate-400 flex items-center justify-center text-xs mono-academic font-bold text-slate-800 shrink-0 mt-0.5">
+              ${['A', 'B', 'C', 'D'][optIdx]}
+            </span>
+            <span class="text-sm text-slate-800 leading-relaxed">${optText.substring(3)}</span>
+          `;
+          closedBox.appendChild(btn);
+        });
+      } else {
+        closedBox.classList.add('hidden');
+        openBox.classList.remove('hidden');
+        const textarea = document.getElementById('openAnswerTextarea');
+        textarea.value = examState.openAnswers[idx] || '';
+        validateOpenAnswerLive();
+      }
+
+      if (!keepRemainingSeconds || typeof examState.remainingSeconds !== 'number' || examState.remainingSeconds <= 0) {
+        examState.remainingSeconds = isClosed ? CONFIG.closedQuestionSeconds : CONFIG.openQuestionSeconds;
+      }
+      if (!CONFIG.restrictions.timerEnabled) {
+        examState.remainingSeconds = 0;
+      }
+
+      startQuestionCountdown();
+      updateNextButtonState();
+      saveExamProgress();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function selectClosedOption(optIdx) {
+      examState.closedAnswers[examState.currentIndex] = optIdx;
+      const cards = document.querySelectorAll('#closedOptionsContainer .option-row');
+      cards.forEach((card, i) => {
+        if (i === optIdx) card.classList.add('selected');
+        else card.classList.remove('selected');
+      });
+      saveExamProgress();
+      updateNextButtonState();
+    }
+
+    function validateOpenAnswerLive() {
+      const idx = examState.currentIndex;
+      const text = document.getElementById('openAnswerTextarea').value;
+      examState.openAnswers[idx] = text;
+      saveExamProgress();
+
+      const evalResult = evaluateOpenCoherence(text);
+      document.getElementById('openLinesCounter').textContent =
+        `Renglones: ${evalResult.effectiveLines} / 4 | Palabras: ${evalResult.wordCount} / 28`;
+
+      const badge = document.getElementById('openCoherenceBadge');
+      if (evalResult.isValid || !CONFIG.restrictions.minLinesEnabled) {
+        badge.textContent = '✓ Extensión validada';
+        badge.className = 'px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-400 font-bold';
+      } else {
+        badge.textContent = 'Mínimo 4 renglones coherentes';
+        badge.className = 'px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold';
+      }
+
+      updateNextButtonState();
+    }
+
+    function evaluateOpenCoherence(text) {
+      const clean = (text || '').trim();
+      const words = clean.split(/\s+/).filter(w => w.length >= 2);
+      const wordCount = words.length;
+      const uniqueWords = new Set(words.map(w => w.toLowerCase().replace(/[^a-záéíóúñ]/g, ''))).size;
+      const lexicalRatio = wordCount > 0 ? uniqueWords / wordCount : 0;
+
+      const charLines = Math.floor(clean.length / 65);
+      const explicitLines = clean.split(/\n+/).filter(l => l.trim().split(/\s+/).length >= 5).length;
+      const effectiveLines = Math.max(charLines, explicitLines);
+
+      const hasNoSpam = !/(.)\1{5,}/.test(clean);
+      const isValid = effectiveLines >= 4 && wordCount >= 28 && uniqueWords >= 14 && lexicalRatio >= 0.35 && hasNoSpam;
+
+      return { effectiveLines, wordCount, uniqueWords, isValid };
+    }
+
+    function startQuestionCountdown() {
+      if (questionTimerInterval) clearInterval(questionTimerInterval);
+      renderTimerDisplay();
+
+      questionTimerInterval = setInterval(() => {
+        if (!CONFIG.restrictions.timerEnabled) {
+          examState.remainingSeconds = 0;
+          renderTimerDisplay();
+          updateNextButtonState();
+          clearInterval(questionTimerInterval);
+          return;
+        }
+
+        if (examState.remainingSeconds > 0) {
+          examState.remainingSeconds--;
+          renderTimerDisplay();
+          if (examState.remainingSeconds % 5 === 0) saveExamProgress();
+        } else {
+          clearInterval(questionTimerInterval);
+          renderTimerDisplay();
+          updateNextButtonState();
+        }
+      }, 1000);
+    }
+
+    function renderTimerDisplay() {
+      const sec = Math.max(0, examState.remainingSeconds);
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      const el = document.getElementById('questionTimerDisplay');
+      el.textContent = `${m}:${s}`;
+      if (sec === 0) {
+        el.className = 'text-base mono-academic font-bold text-emerald-400';
+      } else {
+        el.className = 'text-base mono-academic font-bold text-white';
+      }
+    }
+
+    function updateNextButtonState() {
+      const idx = examState.currentIndex;
+      const q = QUESTIONS[idx];
+      if (!q) return;
+
+      const timerDone = !CONFIG.restrictions.timerEnabled || examState.remainingSeconds <= 0;
+      let answerReady = false;
+
+      if (q.type === 'closed') {
+        answerReady = typeof examState.closedAnswers[idx] === 'number';
+      } else {
+        const text = examState.openAnswers[idx] || '';
+        answerReady = !CONFIG.restrictions.minLinesEnabled ? text.trim().length > 0 : evaluateOpenCoherence(text).isValid;
+      }
+
+      const btn = document.getElementById('nextQuestionBtn');
+      const lockText = document.getElementById('lockExplanationText');
+
+      if (timerDone && answerReady) {
+        btn.disabled = false;
+        btn.classList.remove('opacity-40', 'cursor-not-allowed');
+        if (idx === CONFIG.totalClosed - 1) {
+          btn.textContent = 'Concluir Bloque 1 y Guardar Progreso →';
+        } else if (idx === QUESTIONS.length - 1) {
+          btn.textContent = 'Finalizar Examen y Ver Resultados →';
+        } else {
+          btn.textContent = 'Guardar y Continuar →';
+        }
+        lockText.textContent = '✓ Tiempo cumplido y respuesta registrada.';
+        lockText.className = 'text-xs text-emerald-800 font-bold';
+      } else {
+        btn.disabled = true;
+        btn.classList.add('opacity-40', 'cursor-not-allowed');
+        if (!timerDone && !answerReady) {
+          lockText.textContent = 'Espera a que el reloj llegue a 00:00 y registra tu respuesta.';
+        } else if (!timerDone) {
+          lockText.textContent = 'Respuesta seleccionada. Espera a que el reloj llegue a 00:00.';
+        } else {
+          lockText.textContent = q.type === 'closed'
+            ? 'Reloj en 00:00. Selecciona una opción para avanzar.'
+            : 'Reloj en 00:00. Completa mínimo 4 renglones coherentes (28+ palabras).';
+        }
+        lockText.className = 'text-xs text-slate-600 font-medium';
+      }
+    }
+
+    function handleNextQuestion() {
+      const idx = examState.currentIndex;
+
+      // Al completar la pregunta 20 (última del Bloque 1)
+      if (idx === CONFIG.totalClosed - 1 && !examState.block2UnlockedByTeacher) {
+        examState.block1Completed = true;
+        examState.block1EndTimeISO = new Date().toISOString();
+        examState.currentIndex = CONFIG.totalClosed; // Posiciona en la #21
+        examState.remainingSeconds = CONFIG.openQuestionSeconds;
+        lockExamAtEndOfBlock1('Has completado las 20 preguntas cerradas del Primer Bloque (11:25 AM – 12:15 PM). Tu progreso se encuentra guardado en el dispositivo. A la 1:50 PM podrás iniciar el Segundo Bloque ingresando la contraseña habilitada por el docente (0323).');
+        return;
+      }
+
+      if (idx + 1 < QUESTIONS.length) {
+        examState.currentIndex++;
+        examState.remainingSeconds = QUESTIONS[examState.currentIndex].type === 'closed'
+          ? CONFIG.closedQuestionSeconds
+          : CONFIG.openQuestionSeconds;
+        renderCurrentQuestion(false);
+      } else {
+        finishExam();
+      }
+    }
+
+    /***********************************************************************
+     * 9. SUSPENSIÓN Y DESBLOQUEO INTERBLOQUE (CLAVE 0323)
+     ***********************************************************************/
+    function lockExamAtEndOfBlock1(customMessage) {
+      if (questionTimerInterval) clearInterval(questionTimerInterval);
+      examState.waitingForBlock2 = true;
+      saveExamProgress();
+      if (customMessage) {
+        document.getElementById('interBlockMessage').innerHTML = customMessage;
+      }
+      showInterBlockLockModal();
+    }
+
+    function showInterBlockLockModal() {
+      document.getElementById('unlockBlock2Password').value = '';
+      document.getElementById('unlockBlock2Error').classList.add('hidden');
+      document.getElementById('interBlockLockModal').classList.remove('hidden');
+    }
+
+    function unlockSecondBlockWithPassword() {
+      const pass = document.getElementById('unlockBlock2Password').value.trim();
+      if (pass === '0323' || pass === 'dmar2026') {
+        examState.block2UnlockedByTeacher = true;
+        examState.waitingForBlock2 = false;
+        examState.block2StartTimeISO = new Date().toISOString();
+        if (examState.currentIndex < CONFIG.totalClosed) {
+          examState.currentIndex = CONFIG.totalClosed;
+        }
+        examState.remainingSeconds = CONFIG.openQuestionSeconds;
+        saveExamProgress();
+
+        document.getElementById('interBlockLockModal').classList.add('hidden');
+        showToast('Segundo Bloque habilitado con éxito. Preguntas abiertas iniciadas.', 'success');
+        renderCurrentQuestion(false);
+      } else {
+        document.getElementById('unlockBlock2Error').classList.remove('hidden');
+      }
+    }
+
+    /***********************************************************************
+     * 10. SUPERVISIÓN: PESTAÑAS, PANTALLA COMPLETA Y RUIDO
+     ***********************************************************************/
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, () => { lastUserActivity = Date.now(); }, { passive: true });
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!examState.started || examState.finished || examState.waitingForBlock2) return;
+      if (!CONFIG.restrictions.tabControlEnabled) return;
+
+      if (document.hidden) {
+        const inactiveElapsed = (Date.now() - lastUserActivity) / 1000;
+        if (inactiveElapsed < 7.5) {
+          applyPenalty('Cambio de pestaña o salida de la aplicación', 0.50);
+        }
+      }
+    });
+
+    function requestExamFullscreen() {
+      if (!CONFIG.restrictions.fullscreenEnabled) return;
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      }
+    }
+
+    function returnToFullscreen() {
+      document.getElementById('fullscreenModal').classList.add('hidden');
+      requestExamFullscreen();
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      if (!examState.started || examState.finished || examState.waitingForBlock2) return;
+      if (!CONFIG.restrictions.fullscreenEnabled) return;
+      if (!document.fullscreenElement) {
+        document.getElementById('fullscreenModal').classList.remove('hidden');
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'u', 's', 'p'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+      if (e.key === 'F12') e.preventDefault();
+    });
+
+    async function initNoiseMonitor() {
+      if (audioContext) return;
+      try {
+        microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(microphoneStream);
+        analyserNode = audioContext.createAnalyser();
+        analyserNode.fftSize = 256;
+        source.connect(analyserNode);
+
+        const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+        setInterval(() => {
+          if (!analyserNode) return;
+          analyserNode.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+          const avg = sum / dataArray.length;
+          const pct = Math.min(100, Math.round((avg / 140) * 100));
+
+          const bar = document.getElementById('noiseBar');
+          const txt = document.getElementById('noiseText');
+          bar.style.width = `${pct}%`;
+          txt.textContent = `${pct}%`;
+
+          if (pct >= 60) {
+            bar.className = 'h-full bg-red-500 transition-all duration-150';
+            if (examState.started && !examState.finished && !examState.waitingForBlock2 && CONFIG.restrictions.noiseControlEnabled) {
+              const now = Date.now();
+              if (now - lastNoisePenaltyTime > 10000) {
+                lastNoisePenaltyTime = now;
+                applyPenalty(`Ruido ambiental superior al 60% (${pct}%)`, 0.50);
+              }
+            }
+          } else if (pct >= 40) {
+            bar.className = 'h-full bg-amber-400 transition-all duration-150';
+          } else {
+            bar.className = 'h-full bg-emerald-500 transition-all duration-150';
+          }
+        }, 250);
+      } catch (err) {
+        document.getElementById('noiseText').textContent = 'N/A';
+      }
+    }
+
+    function applyPenalty(reason, pts) {
+      examState.penalties = Number((examState.penalties + pts).toFixed(2));
+      const timeStr = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      examState.penaltyLog.push({ time: timeStr, reason, points: pts });
+      document.getElementById('penaltyCounterDisplay').textContent = `-${examState.penalties.toFixed(2)} pts`;
+      saveExamProgress();
+      showToast(`Penalización (-${pts.toFixed(2)} pts): ${reason}`, 'error');
+    }
+
+    /***********************************************************************
+     * 11. PANEL DOCENTE (0323 / dmar2026)
+     ***********************************************************************/
+    function openTeacherModal() {
+      document.getElementById('teacherPasswordInput').value = '';
+      document.getElementById('teacherAuthError').classList.add('hidden');
+      document.getElementById('teacherModal').classList.remove('hidden');
+    }
+
+    function closeTeacherModal() {
+      document.getElementById('teacherModal').classList.add('hidden');
+    }
+
+    function verifyTeacherPassword() {
+      const val = document.getElementById('teacherPasswordInput').value.trim();
+      if (val === '0323' || val === 'dmar2026') {
+        document.getElementById('teacherAuthBox').classList.add('hidden');
+        document.getElementById('teacherControlsPanel').classList.remove('hidden');
+        document.getElementById('teacherAuthError').classList.add('hidden');
+      } else {
+        document.getElementById('teacherAuthError').classList.remove('hidden');
+      }
+    }
+
+    function updateTeacherRestrictions() {
+      CONFIG.restrictions.scheduleEnabled = document.getElementById('toggleScheduleCheck').checked;
+      CONFIG.restrictions.timerEnabled = document.getElementById('toggleTimerCheck').checked;
+      CONFIG.restrictions.tabControlEnabled = document.getElementById('toggleTabCheck').checked;
+      CONFIG.restrictions.noiseControlEnabled = document.getElementById('toggleNoiseCheck').checked;
+      CONFIG.restrictions.fullscreenEnabled = document.getElementById('toggleFullscreenCheck').checked;
+      CONFIG.restrictions.minLinesEnabled = document.getElementById('toggleLinesCheck').checked;
+
+      if (!CONFIG.restrictions.timerEnabled && examState.started && !examState.finished) {
+        examState.remainingSeconds = 0;
+        renderTimerDisplay();
+      }
+      if (!CONFIG.restrictions.fullscreenEnabled) {
+        document.getElementById('fullscreenModal').classList.add('hidden');
+      }
+      updateNextButtonState();
+      updateLiveClockAndSchedule();
+      showToast('Restricciones actualizadas por el docente.', 'success');
+    }
+
+    function teacherUnlockOrStartNow() {
+      closeTeacherModal();
+      if (!examState.started) {
+        tryStartExam(true);
+      } else {
+        if (examState.waitingForBlock2) {
+          examState.block2UnlockedByTeacher = true;
+          examState.waitingForBlock2 = false;
+          document.getElementById('interBlockLockModal').classList.add('hidden');
+        }
+        examState.remainingSeconds = 0;
+        renderTimerDisplay();
+        updateNextButtonState();
+        showToast('Reloj liberado a 00:00.', 'success');
+      }
+    }
+
+    function teacherForceNextQuestion() {
+      closeTeacherModal();
+      if (!examState.started) {
+        tryStartExam(true);
+        return;
+      }
+      if (examState.currentIndex + 1 < QUESTIONS.length) {
+        examState.currentIndex++;
+        if (examState.currentIndex >= CONFIG.totalClosed) {
+          examState.block2UnlockedByTeacher = true;
+          examState.waitingForBlock2 = false;
+          document.getElementById('interBlockLockModal').classList.add('hidden');
+        }
+        renderCurrentQuestion(false);
+        showToast(`Avanzado a la pregunta ${examState.currentIndex + 1}.`, 'success');
+      } else {
+        finishExam();
+      }
+    }
+
+    function teacherJumpToOpenBlock() {
+      closeTeacherModal();
+      if (!examState.started) {
+        tryStartExam(true);
+      }
+      examState.block1Completed = true;
+      examState.block2UnlockedByTeacher = true;
+      examState.waitingForBlock2 = false;
+      examState.block2StartTimeISO = new Date().toISOString();
+      document.getElementById('interBlockLockModal').classList.add('hidden');
+
+      if (examState.currentIndex < CONFIG.totalClosed) {
+        examState.currentIndex = CONFIG.totalClosed;
+        renderCurrentQuestion(false);
+        showToast('Iniciando Sesión 2 (Pregunta Abierta #21).', 'success');
+      } else {
+        finishExam();
+      }
+    }
+
+    function teacherFinishExamNow() {
+      closeTeacherModal();
+      if (!examState.started) {
+        examState.studentName = document.getElementById('studentNameInput').value.trim() || 'Estudiante Evaluado por Docente';
+        examState.started = true;
+        examState.startTimeISO = new Date().toISOString();
+      }
+      document.getElementById('interBlockLockModal').classList.add('hidden');
+      finishExam();
+    }
+
+    function teacherResetPenalties() {
+      examState.penalties = 0;
+      examState.penaltyLog = [];
+      document.getElementById('penaltyCounterDisplay').textContent = '-0.00 pts';
+      saveExamProgress();
+      showToast('Penalizaciones restablecidas a 0.00.', 'success');
+    }
+
+    function teacherClearSavedStorage() {
+      localStorage.removeItem(STORAGE_KEY);
+      showToast('Datos locales borrados. Reiniciando...', 'warning');
+      setTimeout(() => location.reload(), 900);
+    }
+
+    /***********************************************************************
+     * 12. CALIFICACIÓN Y REPORTES
+     ***********************************************************************/
+    function calculateDetailedScores() {
+      const closedUnitValue = CONFIG.closedBlockPoints / CONFIG.totalClosed; // 0.185 pts
+      const openUnitValue = CONFIG.openBlockPoints / CONFIG.totalOpen;       // 0.260 pts
+
+      let closedCorrectCount = 0;
+      let closedAnsweredCount = 0;
+      for (let i = 0; i < CONFIG.totalClosed; i++) {
+        if (typeof examState.closedAnswers[i] === 'number') {
+          closedAnsweredCount++;
+          if (examState.closedAnswers[i] === QUESTIONS[i].correct) {
+            closedCorrectCount++;
+          }
+        }
+      }
+
+      let openValidCount = 0;
+      let openAnsweredCount = 0;
+      for (let i = CONFIG.totalClosed; i < QUESTIONS.length; i++) {
+        const txt = (examState.openAnswers[i] || '').trim();
+        if (txt.length > 0) {
+          openAnsweredCount++;
+          const ev = evaluateOpenCoherence(txt);
+          if (ev.isValid || (!CONFIG.restrictions.minLinesEnabled && txt.length >= 15)) {
+            openValidCount++;
+          }
+        }
+      }
+
+      const closedPoints = closedCorrectCount * closedUnitValue;
+      const openPoints = openValidCount * openUnitValue;
+      const rawScore = closedPoints + openPoints;
+      const finalScore = Math.max(0, Math.min(5.0, Number((rawScore - examState.penalties).toFixed(2))));
+
+      return {
+        closedCorrectCount,
+        closedIncorrectCount: CONFIG.totalClosed - closedCorrectCount,
+        closedAnsweredCount,
+        openValidCount,
+        openAnsweredCount,
+        totalAnswered: closedAnsweredCount + openAnsweredCount,
+        closedPoints: Number(closedPoints.toFixed(2)),
+        openPoints: Number(openPoints.toFixed(2)),
+        rawScore: Number(rawScore.toFixed(2)),
+        finalScore
+      };
+    }
+
+    function finishExam() {
+      if (questionTimerInterval) clearInterval(questionTimerInterval);
+      examState.finished = true;
+      examState.waitingForBlock2 = false;
+      examState.endTimeISO = new Date().toISOString();
+      saveExamProgress();
+
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('examScreen').classList.add('hidden');
+      document.getElementById('interBlockLockModal').classList.add('hidden');
+      document.getElementById('fullscreenModal').classList.add('hidden');
+      document.getElementById('resultsScreen').classList.remove('hidden');
+
+      const scores = calculateDetailedScores();
+
+      const startStr = examState.startTimeISO
+        ? new Date(examState.startTimeISO).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        : '--:--';
+      const endStr = new Date(examState.endTimeISO).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const dateStr = new Date().toLocaleDateString('es-CO');
+
+      document.getElementById('resultStudentSubtitle').textContent =
+        `Estudiante: ${examState.studentName} • Grado: 10° • Fecha: ${dateStr} • Apertura: ${startStr} | Cierre: ${endStr}`;
+
+      document.getElementById('finalGradeValue').textContent = scores.finalScore.toFixed(2);
+      const perfLabel = document.getElementById('finalPerformanceLabel');
+      if (scores.finalScore >= 4.6) {
+        perfLabel.textContent = 'DESEMPEÑO SUPERIOR';
+        perfLabel.className = 'text-xs font-bold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-400 inline-block';
+      } else if (scores.finalScore >= 4.0) {
+        perfLabel.textContent = 'DESEMPEÑO ALTO';
+        perfLabel.className = 'text-xs font-bold uppercase px-2 py-0.5 rounded bg-sky-100 text-sky-900 border border-sky-400 inline-block';
+      } else if (scores.finalScore >= 3.0) {
+        perfLabel.textContent = 'DESEMPEÑO BÁSICO';
+        perfLabel.className = 'text-xs font-bold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-400 inline-block';
+      } else {
+        perfLabel.textContent = 'DESEMPEÑO BAJO';
+        perfLabel.className = 'text-xs font-bold uppercase px-2 py-0.5 rounded bg-red-100 text-red-900 border border-red-400 inline-block';
+      }
+
+      document.getElementById('closedSummaryValue').textContent = `${scores.closedCorrectCount} / ${CONFIG.totalClosed}`;
+      document.getElementById('closedPointsText').textContent = `${scores.closedPoints.toFixed(2)} / 3.70 pts`;
+
+      document.getElementById('openSummaryValue').textContent = `${scores.openValidCount} / ${CONFIG.totalOpen}`;
+      document.getElementById('openPointsText').textContent = `${scores.openPoints.toFixed(2)} / 1.30 pts`;
+
+      document.getElementById('penaltySummaryValue').textContent = `-${examState.penalties.toFixed(2)} pts`;
+      document.getElementById('penaltyCountText').textContent = `${examState.penaltyLog.length} registradas`;
+
+      const pattern = [];
+      for (let i = 0; i < CONFIG.totalClosed; i++) {
+        const ans = examState.closedAnswers[i];
+        const letter = typeof ans === 'number' ? ['A', 'B', 'C', 'D'][ans] : '-';
+        const ok = ans === QUESTIONS[i].correct ? '1' : '0';
+        pattern.push(`P${i + 1}:${letter}(${ok})`);
+      }
+
+      const qrPayload = [
+        `INST:FARO DE LUZ`,
+        `DOCENTE:Cristian David Ayazo`,
+        `ASIG:CIENCIAS DE LA CREACION 10`,
+        `EST:${examState.studentName}`,
+        `FECHA:${dateStr}`,
+        `INICIO:${startStr}`,
+        `FIN:${endStr}`,
+        `NOTA:${scores.finalScore.toFixed(2)}/5.00`,
+        `BASE:${scores.rawScore.toFixed(2)}`,
+        `PENAL:-${examState.penalties.toFixed(2)}`,
+        `CONTESTADAS:${scores.totalAnswered}/25`,
+        `CERRADAS_OK:${scores.closedCorrectCount}/20`,
+        `ABIERTAS_OK:${scores.openValidCount}/5`,
+        `PATRON:${pattern.join(',')}`
+      ].join(' | ');
+
+      new QRious({
+        element: document.getElementById('qrCanvas'),
+        value: qrPayload,
+        size: 160,
+        level: 'M'
+      });
+
+      const reviewContainer = document.getElementById('detailedReviewList');
+      reviewContainer.innerHTML = '';
+
+      QUESTIONS.forEach((q, idx) => {
+        const item = document.createElement('div');
+        item.className = 'bg-slate-50 border border-slate-300 rounded-md p-3 text-xs space-y-1';
+
+        if (q.type === 'closed') {
+          const chosen = examState.closedAnswers[idx];
+          const isOk = chosen === q.correct;
+          const chosenText = typeof chosen === 'number' ? q.options[chosen] : 'No contestada';
+          const correctText = q.options[q.correct];
+
+          item.innerHTML = `
+            <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-1">
+              <span class="font-bold text-[#0a2240]">Pregunta #${idx + 1} (${q.topic})</span>
+              <span class="px-2 py-0.5 rounded font-bold ${isOk ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-red-100 text-red-900 border border-red-300'}">
+                ${isOk ? '✓ Correcta (+0.185 pts)' : '✕ Incorrecta (0.00 pts)'}
+              </span>
+            </div>
+            <p class="text-slate-900 font-semibold">${q.stem}</p>
+            <p class="text-slate-700"><strong>Tu respuesta:</strong> ${chosenText}</p>
+            ${!isOk ? `<p class="text-emerald-800 font-medium"><strong>Respuesta oficial:</strong> ${correctText}</p>` : ''}
+          `;
+        } else {
+          const txt = (examState.openAnswers[idx] || '').trim();
+          const ev = evaluateOpenCoherence(txt);
+          const isOk = ev.isValid || (!CONFIG.restrictions.minLinesEnabled && txt.length >= 15);
+
+          item.innerHTML = `
+            <div class="flex items-center justify-between gap-2 border-b border-slate-200 pb-1">
+              <span class="font-bold text-[#0a2240]">Pregunta #${idx + 1} (${q.topic})</span>
+              <span class="px-2 py-0.5 rounded font-bold ${isOk ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-red-100 text-red-900 border border-red-300'}">
+                ${isOk ? '✓ Validada (+0.260 pts)' : '✕ Extensión Insuficiente (0.00 pts)'}
+              </span>
+            </div>
+            <p class="text-slate-900 font-semibold">${q.stem}</p>
+            <div class="serif-academic bg-white border border-slate-300 p-2.5 rounded text-slate-800 whitespace-pre-wrap">${txt || '[Sin respuesta redactada]'}</div>
+          `;
+        }
+        reviewContainer.appendChild(item);
+      });
+
+      localStorage.removeItem(STORAGE_KEY);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /***********************************************************************
+     * 13. EXPORTACIÓN PDF CON BANNER Y QR
+     ***********************************************************************/
+    async function generateDetailedPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const scores = calculateDetailedScores();
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 12;
+      let y = 10;
+
+      try {
+        const bannerDataUrl = await getBannerForPDF();
+        doc.addImage(bannerDataUrl, 'JPEG', margin, y, pageWidth - margin * 2, 38);
+        y += 42;
+      } catch (e) {
+        y += 10;
+      }
+
+      doc.setFillColor(10, 34, 64);
+      doc.roundedRect(margin, y, pageWidth - margin * 2, 46, 2, 2, 'F');
+
+      const dateStr = new Date().toLocaleDateString('es-CO');
+      const startStr = examState.startTimeISO
+        ? new Date(examState.startTimeISO).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        : '--:--';
+      const endStr = new Date(examState.endTimeISO).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      doc.setTextColor(243, 205, 105);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10.5);
+      doc.text('ACTA OFICIAL DE EVALUACIÓN • CIENCIAS DE LA CREACIÓN (10°)', margin + 4, y + 7);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(9);
+      doc.text(`Estudiante: ${examState.studentName}`, margin + 4, y + 14);
+      doc.text(`Docente: Cristian David Ayazo  |  Fecha: ${dateStr}`, margin + 4, y + 20);
+      doc.text(`Apertura: ${startStr}  |  Cierre: ${endStr}  |  Sesiones: 11:25-12:15 y 1:50-2:30`, margin + 4, y + 26);
+      doc.text(`Preguntas Contestadas: ${scores.totalAnswered} de 25  |  Cerradas Correctas: ${scores.closedCorrectCount}/20 (${scores.closedPoints.toFixed(2)} pts)`, margin + 4, y + 32);
+      doc.text(`Abiertas Validadas: ${scores.openValidCount}/5 (${scores.openPoints.toFixed(2)} pts)  |  Penalizaciones: -${examState.penalties.toFixed(2)} pts`, margin + 4, y + 38);
+
+      doc.setTextColor(110, 231, 183);
+      doc.setFontSize(11.5);
+      doc.text(`NOTA DEFINITIVA: ${scores.finalScore.toFixed(2)} / 5.00`, margin + 4, y + 44);
+
+      try {
+        const qrCanvas = document.getElementById('qrCanvas');
+        const qrDataUrl = qrCanvas.toDataURL('image/png');
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(pageWidth - margin - 38, y + 5, 34, 34, 2, 2, 'F');
+        doc.addImage(qrDataUrl, 'PNG', pageWidth - margin - 36, y + 7, 30, 30);
+      } catch (e) {}
+
+      y += 52;
+
+      doc.setTextColor(10, 34, 64);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text('I. SUPERVISIÓN Y PENALIZACIONES:', margin, y);
+      y += 5;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      if (examState.penaltyLog.length === 0) {
+        doc.setTextColor(5, 120, 85);
+        doc.text('• Sin penalizaciones registradas durante los dos bloques (-0.00 pts).', margin + 2, y);
+        y += 6;
+      } else {
+        doc.setTextColor(185, 28, 28);
+        examState.penaltyLog.forEach((p, idx) => {
+          if (y > pageHeight - 20) { doc.addPage(); y = 15; }
+          doc.text(`${idx + 1}. [${p.time}] ${p.reason} (-${p.points.toFixed(2)} pts)`, margin + 2, y);
+          y += 4.5;
+        });
+        y += 2;
+      }
+
+      doc.setTextColor(10, 34, 64);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.text('II. DESGLOSE DETALLADO DE LAS 25 PREGUNTAS:', margin, y);
+      y += 6;
+
+      QUESTIONS.forEach((q, idx) => {
+        if (y > pageHeight - 36) { doc.addPage(); y = 15; }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.8);
+
+        if (q.type === 'closed') {
+          const chosen = examState.closedAnswers[idx];
+          const isOk = chosen === q.correct;
+          doc.setTextColor(isOk ? 5 : 185, isOk ? 120 : 28, isOk ? 85 : 28);
+          doc.text(`Pregunta ${idx + 1} [Cerrada - ${q.topic}] — ${isOk ? 'CORRECTA (+0.185 pts)' : 'INCORRECTA (0.00 pts)'}`, margin, y);
+          y += 4.5;
+
+          doc.setTextColor(30, 41, 59);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.1);
+          const stemLines = doc.splitTextToSize(`Enunciado: ${q.stem}`, pageWidth - margin * 2);
+          doc.text(stemLines, margin, y);
+          y += stemLines.length * 3.8 + 1;
+
+          const chosenStr = typeof chosen === 'number' ? q.options[chosen] : 'No contestada';
+          const chosenLines = doc.splitTextToSize(`Respuesta elegida: ${chosenStr}`, pageWidth - margin * 2);
+          doc.text(chosenLines, margin + 2, y);
+          y += chosenLines.length * 3.8 + 1;
+
+          if (!isOk) {
+            doc.setTextColor(5, 120, 85);
+            const corrLines = doc.splitTextToSize(`Respuesta correcta: ${q.options[q.correct]}`, pageWidth - margin * 2);
+            doc.text(corrLines, margin + 2, y);
+            y += corrLines.length * 3.8 + 1;
+          }
+          y += 2.5;
+        } else {
+          const txt = (examState.openAnswers[idx] || '').trim();
+          const ev = evaluateOpenCoherence(txt);
+          const isOk = ev.isValid || (!CONFIG.restrictions.minLinesEnabled && txt.length >= 15);
+
+          doc.setTextColor(isOk ? 5 : 185, isOk ? 120 : 28, isOk ? 85 : 28);
+          doc.text(`Pregunta ${idx + 1} [Abierta - ${q.topic}] — ${isOk ? 'VALIDADA (+0.260 pts)' : 'NO VALIDADA (0.00 pts)'}`, margin, y);
+          y += 4.5;
+
+          doc.setTextColor(30, 41, 59);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.1);
+          const stemLines = doc.splitTextToSize(`Enunciado: ${q.stem}`, pageWidth - margin * 2);
+          doc.text(stemLines, margin, y);
+          y += stemLines.length * 3.8 + 1;
+
+          doc.setFont('helvetica', 'italic');
+          const ansLines = doc.splitTextToSize(`Texto redactado por el estudiante: "${txt || 'Sin respuesta redactada'}"`, pageWidth - margin * 2 - 4);
+          if (y + ansLines.length * 3.8 > pageHeight - 15) { doc.addPage(); y = 15; }
+          doc.text(ansLines, margin + 2, y);
+          y += ansLines.length * 3.8 + 3.5;
+        }
+      });
+
+      const cleanName = examState.studentName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]/g, '').trim().replace(/\s+/g, '_');
+      doc.save(`Acta_Ciencias_Creacion_10_${cleanName || 'Estudiante'}.pdf`);
+    }
+
+    /***********************************************************************
+     * 14. INICIALIZACIÓN Y TOASTS
+     ***********************************************************************/
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      let colors = 'bg-[#0a2240] border-[#b88b28] text-white';
+      if (type === 'error') colors = 'bg-red-900 border-red-400 text-white';
+      if (type === 'success') colors = 'bg-emerald-900 border-emerald-400 text-white';
+      if (type === 'warning') colors = 'bg-amber-900 border-amber-400 text-white';
+
+      toast.className = `p-3 rounded border-l-4 shadow-xl text-xs font-semibold transition-all duration-300 pointer-events-auto ${colors}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initBannerImage();
+      updateLiveClockAndSchedule();
+      clockInterval = setInterval(updateLiveClockAndSchedule, 1000);
+      checkSavedProgressOnLoad();
+    });
+  </script>
+</body>
+</html>
